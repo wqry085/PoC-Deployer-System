@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_zygote"
+        app:icon="@drawable/ic_arrow_back_black_24"
+        android:title="Zygote日志监听"
+        app:showAsAction="never" />
+   <item
+        android:id="@+id/action_check_update"
+        android:title="检查更新"
+        android:checkable="true"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/action_about"
+        android:title="关于"
+        app:showAsAction="never" />
+</menu>

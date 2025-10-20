@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="multi_select_options">
+        <item>--mount-external-android-writable</item>
+        <item>--mount-external-default</item>
+        <item>--mount-external-read</item>
+        <item>--mount-external-write</item>
+        <item>--mount-external-full</item>
+        <item>--mount-external-legacy</item>
+        <item>--is-top-app</item>
+        <item>--preload-default</item>
+        <item>--preload-app</item>
+        <item>--bind-mount-data-dirs</item>
+        <item>--bind-mount-storage-dirs</item>
+        <item>--mount-external-installer</item>
+        <item>--mount-external-pass-through</item>
+        <item>--mount-external-oplus-android-writable</item>
+    </string-array>
+
+    <string-array name="multi_select_values">
+        <item>option_1</item>
+        <item>option_2</item>
+        <item>option_3</item>
+        <item>option_4</item>
+        <item>option_5</item>
+        <item>option_6</item>
+        <item>option_7</item>
+        <item>option_8</item>
+        <item>option_9</item>
+        <item>option_10</item>
+        <item>option_11</item>
+        <item>option_12</item>
+        <item>option_13</item>
+        <item>option_14</item>
+    </string-array>
+</resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:extractNativeLibs="true"
+        android:name="com.wqry085.deployesystem.next.init_kernel"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:name="com.wqry085.deployesystem.next.BootLoader"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ZygoteActivity" android:exported="false" />
+        <activity android:name=".AboutActivity" android:exported="false" />
+        <activity android:name=".TerminalActivity" android:exported="false" />
+
+        <!-- 分享接收 Activity：runpayload -->
+      <activity
+    android:name=".next.runpayload"
+    android:exported="true"
+    android:label="加载payload"
+    android:theme="@style/TransparentDialogTheme"
+    android:taskAffinity=""
+    android:excludeFromRecents="true"
+    android:launchMode="singleTop">
+
+    <!-- 处理文本分享 -->
+    <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+    </intent-filter>
+
+    <!-- 处理文件分享 -->
+    <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="*/*" />
+    </intent-filter>
+
+    <!-- 处理多文件分享 -->
+    <intent-filter>
+        <action android:name="android.intent.action.SEND_MULTIPLE" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="*/*" />
+    </intent-filter>
+
+    <!-- ADB 直接调用 -->
+    <intent-filter>
+        <action android:name="com.wqry085.deployesystem.ADB_RUN_PAYLOAD" />
+        <category android:name="android.intent.category.DEFAULT" />
+    </intent-filter>
+
+</activity>
+
+        <activity android:name=".hellodream" android:exported="false" />
+
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:multiprocess="false"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+<provider
+    android:name="androidx.core.content.FileProvider"
+    android:authorities="com.wqry085.deployesystem.provider"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_paths" />
+</provider>
+    </application>
+</manifest>

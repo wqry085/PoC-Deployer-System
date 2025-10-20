@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/log_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Zygote日志"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        app:useMaterialThemeColors="true" />
+<TextView
+    android:layout_width="match_parent"
+        android:text="这将从本地启动一个soket监听zygote日志服务需要shizuku权限\n\n成功后在终端模拟器输入nc 127.0.0.1 13568\n控制内部输入STOP结束日志\n通过TRY_GREP/TRY_PID命令切换工作模式"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

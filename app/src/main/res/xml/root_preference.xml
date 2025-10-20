@@ -1,0 +1,130 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="运行时状态">
+        <Preference
+            android:key="runtime_status"
+            android:title="当前状态"
+            android:summary="未运行"
+            android:selectable="false"/>
+            
+        <Preference
+            android:key="log_output"
+            android:title="日志输出"
+            android:summary="暂无日志"
+            android:selectable="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="网络配置">
+        <EditTextPreference
+            android:key="ip_address"
+            android:title="服务器IP"
+            android:dialogTitle="设置服务器IP"
+            android:defaultValue="127.0.0.1"/>
+            
+        <EditTextPreference
+            android:key="server_port"
+            android:title="服务端口"
+            android:dialogTitle="设置服务端口"
+            android:inputType="number"
+            android:defaultValue="9981"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="注入相关">
+        <EditTextPreference
+            android:key="command_input"
+            android:title="输入注入命令"
+            android:dialogTitle="输入Shell命令"
+            android:defaultValue="id"/>
+        
+        <EditTextPreference
+            android:key="setuid_input"
+            android:title="注入UID"
+            android:dialogTitle="输入合法UID"
+            android:defaultValue="1000"/>
+        
+         <EditTextPreference
+            android:key="setgid_input"
+            android:title="注入GID"
+            android:dialogTitle="输入GID"
+            android:defaultValue="1000"/>
+        <EditTextPreference
+            android:key="setgroup_input"
+            android:title="注入GROUP"
+            android:dialogTitle="输入GROUP"/>
+        <EditTextPreference
+            android:key="setselinux_input"
+            android:title="SELinux策略"
+            android:summary="非专业人员请勿修改大概无效"
+            android:defaultValue="platform:privapp:targetSdkVersion=29:complete"
+            android:dialogTitle="输入策略"/>
+         <EditTextPreference
+            android:key="zyg1"
+            android:dialogTitle="输入缓冲"
+            android:defaultValue="3000"
+            android:title="缓冲"/>
+         <EditTextPreference
+            android:key="zyg2"
+            android:title="填充"
+            android:defaultValue="5157"
+            android:dialogTitle="输入填充"/>
+         <EditTextPreference
+            android:key="zyg3"
+            android:title="填充第二部分"
+            android:defaultValue="1400"/>
+        <Preference
+            android:key="1312"
+            android:title="警告"
+            android:summary="你在安卓12及以上运行了此软件 请阅读"/>
+            <Preference
+            android:key="terminal"
+            android:title="终端模拟器"
+            android:summary="软件内部提供的简陋终端模拟器"/>
+        <Preference
+            android:key="execute_btn"
+            android:title="执行命令"
+            android:summary="注入将会立即发生"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="服务器控制">
+        <Preference
+            android:key="start_server"
+            android:title="启动服务"
+            android:summary="启动Socket监听服务"/>
+            
+        <Preference
+            android:key="stop_server"
+            android:title="停止服务"
+            android:summary="停止运行中的服务"
+            android:enabled="false"/>
+    </PreferenceCategory>
+     <Preference
+        android:key="advanced_trigger"
+        android:title="高级选项"
+        android:summary="点击展开/折叠高级设置"/>
+   <PreferenceCategory
+        android:key="advanced_category"
+        android:title="高级"
+        android:visible="true"> <!-- 初始状态为隐藏 -->
+        
+        <Preference
+            android:key="shell_terminal"
+            android:title="启动远程终端"
+            android:summary="这是一个极不稳定的功能。如成功，您可以在Termux和其他终端模拟器上连接提权后的反向交互shell。开发者不保证该功能在所有设备上有效。"/>
+            <Preference
+            android:key="top_data"
+            android:title="提取应用数据"
+            android:summary="通过socket将数据发送给软件您可以在Android/data中的poc数据中找到提取的数据\n注: 下一次提取会移除之前的提取内容"/>
+       <MultiSelectListPreference
+        android:key="multi_select_preference"
+        android:title="Zygote配置参数"
+        android:summary="这是一个非特殊用途功能，请勿使用。该功能加载的额外参数都可能导致payload出错，荷载器无法成功提交等。"
+        android:dialogTitle="选择参数"
+        android:entries="@array/multi_select_options"
+        android:entryValues="@array/multi_select_values"
+         />
+        
+    </PreferenceCategory>
+
+    <!-- 添加一个触发按钮 -->
+   
+</PreferenceScreen>

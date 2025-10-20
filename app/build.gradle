@@ -1,0 +1,76 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.wqry085.deployesystem'
+    ndkVersion "29.0.14033849" 
+    compileSdk 33
+    
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+    
+    lintOptions {
+        abortOnError false
+    }
+    
+    defaultConfig {
+        applicationId "com.wqry085.deployesystem"
+        minSdk 28
+        targetSdk 28
+        versionCode 7
+        versionName "1.5.5"
+        
+        vectorDrawables { 
+            useSupportLibrary true
+        }
+    }
+
+    // 添加签名配置
+    signingConfigs {
+        release {
+            storeFile file('jks/wqry085.jks')  // JKS文件路径
+            storePassword 'xxxx'       // 密钥库密码
+            keyAlias '？'                 // 别名
+            keyPassword 'xxxx'         // 密钥密码
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release  // 应用签名配置
+        }
+    }
+    
+    externalNativeBuild {
+        cmake {
+            path file('src/main/jni/CMakeLists.txt')
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'org.json:json:20220320'
+    implementation 'com.drakeet.about:about:2.5.2'
+    implementation 'com.drakeet.multitype:multitype:4.3.0'
+    implementation "androidx.preference:preference:1.2.1"
+    implementation "dev.rikka.shizuku:api:12.2.0"
+    implementation "dev.rikka.shizuku:provider:12.2.0"
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.9.0")
+}

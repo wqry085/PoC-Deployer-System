@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/black"
+    android:padding="8dp">
+
+    <!-- 输入控制区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/darker_gray"
+        android:padding="8dp">
+
+        <EditText
+            android:id="@+id/et_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Type command here..."
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:backgroundTint="@android:color/white"
+            android:imeOptions="actionSend"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btn_send"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Send"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btn_clear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Clear"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="8dp" />
+
+            <Button
+                android:id="@+id/btn_test"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Test"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="vertical"
+        android:layout_marginTop="8dp">
+        <com.wqry085.deployesystem.TerminalView
+            android:id="@+id/terminal_view"
+            android:layout_width="match_parent"
+            android:focusable="false"
+    android:focusableInTouchMode="false"
+    android:cursorVisible="false"
+    android:longClickable="true"
+    android:inputType="none"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:padding="8dp" />
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Terminal Ready"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:padding="4dp"
+        android:background="@android:color/darker_gray" />
+
+</LinearLayout>

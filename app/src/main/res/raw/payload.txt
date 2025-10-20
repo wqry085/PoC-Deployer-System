@@ -1,0 +1,13 @@
+
+
+
+
+
+8
+--setuid=
+--setgid=
+--runtime-args
+--seinfo=
+--runtime-flags=1
+--nice-name=zYg0te
+--invoke-with
