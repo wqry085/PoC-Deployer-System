@@ -12,12 +12,12 @@
 ## 功能展示
 
 ### 图片一
-![应用图片](https://codeberg.org/wqry085/PoC-Deployer-System/src/branch/main/jpg/a1.jpg)
+![应用图片](https://raw.githubusercontent.com/wqry085/PoC-Deployer-System/main/jpg/a1.jpg)
 
 uid/gid/groups的注入功能
 
 ### 图片二
-![应用图片2](https://codeberg.org/wqry085/PoC-Deployer-System/src/branch/main/jpg/a2.jpg)
+![应用图片2](https://raw.githubusercontent.com/wqry085/PoC-Deployer-System/main/jpg/a2.jpg)
 
 高级功能
 
