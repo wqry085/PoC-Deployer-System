@@ -1,6 +1,4 @@
 # 项目文档
-官方QQ群: 745307987
-
 尽管PoC-Deployer-System已经是一个独立项目但还是在此感谢
 项目  https://github.com/Webldix/CVE-2024-31317-PoC-Deployer 
 
