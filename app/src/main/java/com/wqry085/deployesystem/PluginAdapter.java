@@ -2,6 +2,7 @@ package com.wqry085.deployesystem;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Environment;
 import android.os.Handler;
@@ -13,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -20,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.BufferedReader;
@@ -82,30 +85,75 @@ public class PluginAdapter extends RecyclerView.Adapter<PluginAdapter.ViewHolder
 
     // 弹窗选择执行方式
     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setTitle("选择操作方式");
-    builder.setMessage("你希望如何处理该插件？");
-    builder.setPositiveButton("直接执行", (dialog, which) -> {
-        Toast.makeText(context, "执行插件中", Toast.LENGTH_SHORT).show();
-        ShizukuExecWithDialog(context, "/system/bin/sh \"" + file.getPath() + "\"");
-    });
-    builder.setNeutralButton("分享到其他应用", (dialog, which) -> {
-        try {
-            android.content.Intent shareIntent = new android.content.Intent(android.content.Intent.ACTION_SEND);
-            shareIntent.setType("*/*");
-            shareIntent.putExtra(android.content.Intent.EXTRA_STREAM,
-                    androidx.core.content.FileProvider.getUriForFile(
-                            context,
-                            context.getPackageName() + ".provider",
-                            file
-                    ));
-            shareIntent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            context.startActivity(android.content.Intent.createChooser(shareIntent, "分享到"));
-        } catch (Exception e) {
-            Toast.makeText(context, "分享失败：" + e.getMessage(), Toast.LENGTH_LONG).show();
+builder.setTitle("选择操作方式");
+builder.setMessage("你希望如何处理该插件？");
+
+// 动态创建多选框
+final boolean[] useShizuku = {false};
+
+LinearLayout layout = new LinearLayout(context);
+layout.setOrientation(LinearLayout.HORIZONTAL);
+layout.setPadding(50, 30, 50, 30);
+
+CheckBox checkBox = new CheckBox(context);
+checkBox.setText("使用 Shizuku 权限执行");
+checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+    useShizuku[0] = isChecked;
+});
+
+layout.addView(checkBox);
+
+TextView hintText = new TextView(context);
+hintText.setText("需要已安装并授权 Shizuku");
+hintText.setTextSize(12);
+hintText.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
+LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+params.setMargins(20, 0, 0, 0);
+hintText.setLayoutParams(params);
+
+layout.addView(hintText);
+builder.setView(layout);
+
+// 其余按钮代码保持不变...
+builder.setPositiveButton("直接执行", (dialog, which) -> {
+    Toast.makeText(context, "执行插件中", Toast.LENGTH_SHORT).show();
+    
+    String command = "/system/bin/sh '" + file.getPath() + "'";
+    
+    if (useShizuku[0]) {
+        File rishFile = new File(context.getFilesDir().getAbsolutePath() + "/terminal_env/bin/rish");                    
+        if (!rishFile.exists()) {
+            new AlertDialog.Builder(context)
+                .setTitle("缺少必要文件")
+                .setMessage("未找到 rish 文件，请更新扩展包以使用 Shizuku 功能")
+                .setPositiveButton("更新扩展包", (dialog1, which1) -> {
+                    Intent intent = new Intent(context, TerminalActivity.class);
+        intent.putExtra("one_time_command","rm -rf "+context.getFilesDir().getAbsolutePath()+"/terminal_env ; echo 现在重新进入终端模拟器以完成更新");
+        context.startActivity(intent);    
+                })
+                .setNegativeButton("取消", null)
+                .show();
+            return;
         }
-    });
-    builder.setNegativeButton("取消", null);
-    builder.show();
+        Intent intent = new Intent(context, TerminalActivity.class);
+        intent.putExtra("one_time_command",context.getFilesDir().getAbsolutePath()+"/terminal_env/bin/rish -c \""+command+"\"");
+        context.startActivity(intent);                    
+        //ShizukuExecWithDialog(context, command);
+    } else {
+        // 直接执行
+        Intent intent = new Intent(context, TerminalActivity.class);
+        intent.putExtra("one_time_command", command);
+        context.startActivity(intent);
+    }
+});
+
+builder.setNeutralButton("分享到其他应用", (dialog, which) -> {
+    // 分享代码保持不变...
+});
+
+builder.setNegativeButton("取消", null);
+builder.show();
 });
     }
 

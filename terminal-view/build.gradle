@@ -1,0 +1,30 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.termux.view'  // 添加这行
+    compileSdk 33
+    
+    defaultConfig {
+        minSdk 28
+        targetSdk 28
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation "androidx.annotation:annotation:1.3.0"
+    api project(":terminal-emulator")
+    testImplementation "junit:junit:4.13.2"
+}

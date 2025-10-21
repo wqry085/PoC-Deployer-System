@@ -78,7 +78,7 @@
             <Preference
             android:key="terminal"
             android:title="终端模拟器"
-            android:summary="软件内部提供的简陋终端模拟器"/>
+            android:summary="轻量版终端模拟器内置部分命令"/>
         <Preference
             android:key="execute_btn"
             android:title="执行命令"

@@ -35,20 +35,3 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_custom_command(TARGET libzygote_term.so POST_BUILD
             COMMAND ${CMAKE_STRIP} --remove-section=.comment "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libzygote_term.so")
 endif ()
-
-# 添加真正的SO库 - terminal-wqry.c
-add_library(terminal-wqry SHARED
-        terminal-wqry.c)
-        
-target_link_libraries(terminal-wqry log)
-
-if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_custom_command(TARGET terminal-wqry POST_BUILD
-            COMMAND ${CMAKE_STRIP} --remove-section=.comment "$<TARGET_FILE:terminal-wqry>")
-endif ()
-
-# 设置输出属性，确保生成正确的SO文件名
-set_target_properties(terminal-wqry PROPERTIES
-        PREFIX "lib"
-        OUTPUT_NAME "terminal-wqry"
-        SUFFIX ".so")
