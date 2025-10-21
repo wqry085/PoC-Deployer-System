@@ -28,7 +28,7 @@
 ![应用图片2](https://raw.githubusercontent.com/wqry085/PoC-Deployer-System/main/jpg/a2.jpg)
 
 ### 反方向shell
-![应用图片](https://raw.githubusercontent.com/wqry085/PoC-Deployer-System/main/jpg/a3.jpg)
+![应用图片3](https://raw.githubusercontent.com/wqry085/PoC-Deployer-System/main/jpg/a3.jpg)
 
 ## 系统要求
 
