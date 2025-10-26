@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-一个基于CVE-2024-31317的Android提权漏洞部署系统，集成了Termux终端模拟器功能。
+一个基于CVE-2024-31317的Android提权漏洞应用程序，集成了Termux终端模拟器功能。
 
 ## 项目声明
 
