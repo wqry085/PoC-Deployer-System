@@ -2,11 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"
-        android:icon="@android:drawable/ic_menu_view"
         android:title="荷载" />
 
     <item
         android:id="@+id/nav_second"
-        android:icon="@android:drawable/ic_menu_manage"
         android:title="云端插件" />
 </menu>

@@ -19,4 +19,14 @@
     <color name="gray_200">#FFEEEEEE</color>
     <color name="gray_500">#FF9E9E9E</color>
     <color name="gray_700">#FF616161</color>
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <!-- TWRP Unlock Activity Colors -->
+    <color name="twrp_background">#0A141E</color>
+    <color name="twrp_accent">#4A90E2</color>
+    <color name="twrp_track_background">#0D1F2D</color>
+    <color name="text_hint_white">#88FFFFFF</color>
 </resources>

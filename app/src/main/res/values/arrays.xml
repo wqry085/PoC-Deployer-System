@@ -1,7 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Theme Options -->
+    <string-array name="theme_entries">
+        <item>@string/theme_default</item>
+        <item>@string/theme_transparent</item>
+    </string-array>
+
+    <string-array name="theme_values">
+        <item>default</item>
+        <item>transparent</item>
+    </string-array>
+
+    <!-- Language Options -->
+    <string-array name="language_entries">
+        <item>@string/language_system</item>
+        <item>@string/language_english</item>
+        <item>@string/language_chinese_simplified</item>
+        <item>@string/language_chinese_traditional</item>
+        <item>@string/language_japanese</item>
+        <item>@string/language_russian</item>
+        <item>@string/language_spanish</item>
+        <item>@string/language_french</item>
+    </string-array>
+
+    <string-array name="language_values">
+        <item>system</item>
+        <item>en</item>
+        <item>zh-CN</item>
+        <item>zh-TW</item>
+        <item>ja</item>
+        <item>ru</item>
+        <item>es</item>
+        <item>fr</item>
+    </string-array>
+
+    <!-- Runtime Flags Options -->
+    <string-array name="runtime_flags_entries">
+        <item>Default (43267)</item>
+        <item>Disable Hidden API Checks (16384)</item>
+        <item>Enable Safemode (32768)</item>
+        <item>Enable CheckJNI (1)</item>
+        <item>None (0)</item>
+    </string-array>
+
+    <string-array name="runtime_flags_values">
+        <item>43267</item>
+        <item>16384</item>
+        <item>32768</item>
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+
     <string-array name="multi_select_options">
-        <item>--mount-external-android-writable</item>
+            <item>--mount-external-android-writable</item>
         <item>--mount-external-default</item>
         <item>--mount-external-read</item>
         <item>--mount-external-write</item>
@@ -33,4 +84,5 @@
         <item>option_13</item>
         <item>option_14</item>
     </string-array>
+
 </resources>

@@ -9,7 +9,7 @@ public class ZygoteArguments {
     // public static String SET_GROUPS="--setgroups="; 写的多余的一个poc会自动补全
     public static String ARGS="--runtime-args\n";
     public static String SEINFN="--seinfo=\n";
-    public static String RUNTIME_FLAGS="--runtime-flags=43267\n";
-    public static String PROC_NAME="--nice-name=zYg0te\n";
+    public static String RUNTIME_FLAGS="--runtime-flags=";
+    public static String PROC_NAME="--nice-name=";
     public static String EXEC_WITH="--invoke-with\n";
 }

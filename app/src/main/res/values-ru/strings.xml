@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PoC-Deployer-System</string>
+    <string name="app_icon_description">Иконка приложения</string>
+
+    <!-- AboutActivity -->
+    <string name="about_category">О приложении</string>
+    <string name="cve_title">Инструмент эксплуатации CVE-2024-31317</string>
+    <string name="beta_desc">Это бета-версия для тестирования и сбора отзывов.\nПожалуйста, сообщайте об ошибках: wqry085super@gmail.com</string>
+    <string name="dev_category">Разработчик</string>
+    <string name="dev_home">Профиль разработчика на Coolapk</string>
+    <string name="project_category">Проект</string>
+    <string name="zygotelog_help">Это запустит локальный слушатель сокетов для службы логов zygote, требующий авторизации прав Shizuku\n\nПосле успешного запуска введите nc 127.0.0.1 13568 в эмуляторе терминала\nВведите STOP в консоли для завершения логирования\nПереключайте режимы работы командами TRY_GREP/TRY_PID</string>
+    
+    <!-- ZygoteActivity - Dialogs -->
+    <string name="apply">Применить</string>
+    <string name="cancel">Отмена</string>
+    <string name="no_update_desc">Нет описания обновления</string>
+    <string name="latest_version">У вас уже установлена последняя версия</string>
+    <string name="check_update_failed">Ошибка проверки обновлений: %s</string>
+    <string name="found_new_version">Доступна новая версия v%s</string>
+    <string name="download_now">Скачать сейчас</string>
+    <string name="later">Позже</string>
+    <string name="downloading">Загрузка обновления v%s</string>
+    <string name="download_complete">Загрузка завершена! Установить сейчас?</string>
+    <string name="download_failed">Ошибка загрузки: %s</string>
+    <string name="update_downloaded">Обновление v%s загружено</string>
+    <string name="install_ask">Обнаружен пакет обновления. Установить сейчас?</string>
+    <string name="install">Установить</string>
+    <string name="start_install_error">Не удалось начать установку: %s</string>
+    <string name="install_later">Установить позже</string>
+    <string name="download_complete_title">Загрузка завершена</string>
+
+    <!-- TerminalActivity -->
+    <string name="clipboard_label">Вывод терминала</string>
+    <string name="deploy_env">=== Развертывание среды терминала ===</string>
+    <string name="wait_msg">Пожалуйста, подождите, это может занять некоторое время...</string>
+    <string name="deploy_success">=== Развертывание завершено ===</string>
+    <string name="deploy_fail">=== Ошибка развертывания среды ===</string>
+    <string name="basic_mode">В настоящее время вы находитесь в базовом системном режиме.</string>
+    <string name="verify_fail">Ошибка: проверка расширенной среды не удалась, остаемся в базовом режиме</string>
+
+    <!-- MaterialDialogHelper -->
+    <string name="confirm">ОК</string>
+    <string name="agree">Подтвердить</string>
+
+    <!-- ZygoteFragment -->
+    <string name="miui_restrict_warning">Оболочки MIUI и PengPai ограничили adb\nНет прав на изменение системных настроек и имитацию нажатий, право Shell WRITE_SECURE_SETTINGS было отозвано\nЭто фатально. Без права WRITE_SECURE_SETTINGS Shell не может изменить hidden_api_blacklist_exemptions, предотвращая инъекцию\nПожалуйста, перейдите в Настройки, включите Настройки безопасности USB в Параметрах разработчика, чтобы восстановить права Shell\nДля похожих устройств, таких как OPPO, пожалуйста, отключите мониторинг прав</string>
+    <string name="beta_warning_title">Предупреждение</string>
+    <string name="beta_warning_msg">Это закрытая бета-версия. Многие функции еще не реализованы. Пожалуйста, будьте готовы к риску нарушения работы zygote, повреждения zygote и даже очистки устройства. Если вы понимаете риски, пожалуйста, продолжайте</string>
+    <string name="create_remote">Создать удаленный терминал</string>
+    <string name="create_msg">Вы уверены? Приложение попытается создать удаленный терминал, используя uid(%s). Пожалуйста, убедитесь, что предыдущие удаленные терминалы завершены.</string>
+    <string name="create_done">Создание завершено</string>
+    <string name="success_hint">В случае успеха запустите nc 127.0.0.1 8080 в любом эмуляторе терминала</string>
+    <string name="warning">Предупреждение</string>
+    <string name="android12_warn">На Android 12 и выше все становится очень сложно. Разбор команд теперь выполняется NativeCommandBuffer. После однократного разбора содержимого он отбрасывает все нераспознанное содержимое и выходит, вместо того чтобы сохранить его для следующего разбора. Это означает, что содержимое инъекции команды будет напрямую отброшено! У разных производителей устройств это может отличаться. Пожалуйста, настройте конфигурацию PoC. Конфигурация по умолчанию может быть ненадежной. Будьте готовы к тому, что устройство не загрузится.</string>
+    <string name="server_started">Сервер запущен, порт: %d</string>
+    <string name="running">Запущен</string>
+    <string name="server_error">Ошибка сервера: %s</string>
+    <string name="server_stopped">Сервер остановлен</string>
+    <string name="stop_error">Ошибка остановки: %s</string>
+    <string name="client_connected">Клиент подключен: %s</string>
+    <string name="client_said"> сказал: %s</string>
+    <string name="client_disconnected"> отключен</string>
+    <string name="close_error">Ошибка закрытия: %s</string>
+    <string name="stopped">Остановлен</string>
+    <string name="invalid_ip">Неверный IP-адрес</string>
+    <string name="ip_updated">IP обновлен до: %s</string>
+    <string name="port_range">Порт должен быть между 1024-65535</string>
+    <string name="port_updated">Порт обновлен до: %d</string>
+    <string name="invalid_port">Неверный номер порта</string>
+    <string name="extract_data">Извлечь данные приложения</string>
+    <string name="run_text">Запуск</string>
+    <string name="input_empty">Ввод не может быть пустым</string>
+    <string name="app_not_found">Приложение не найдено</string>
+    <string name="ok_text">ОК</string>
+    <string name="payload_injected">Payload внедрен</string>
+    <string name="payload_sign">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; payload</string>
+    <string name="paste_hint">Вставьте прямо в JAVA. xh - это JAVA-имя макета после перехода. Вы можете изменить его</string>
+    <string name="config_file">ReadOnly_Config.txt</string>
+    <string name="load_fail">Не удалось загрузить payload</string>
+    <string name="serious_warning">Серьезное предупреждение: Если вы не выполните эту операцию, теоретически ваша конфигурация может сохраниться, но скорее всего это приведет к невозможности загрузки</string>
+    <string name="deploy_end">Развертывание эксплойта завершено: %s</string>
+    <string name="param_not_found">Число количества параметров не найдено!</string>
+    <string name="anchor_not_found">Параметр привязки не найден: %s</string>
+    <string name="close_miui">Пожалуйста, отключите оптимизацию MIUI!!!</string>
+    <string name="miui_error">MIUI_OPT: %s</string>
+
+    <!-- BootLoader -->
+    <string name="boot_title">Загрузчик</string>
+    <string name="initializing">Инициализация...</string>
+    <string name="app_title">PoC Deployer System</string>
+    <string name="storage_permission_granted">Разрешение на хранилище предоставлено</string>
+    <string name="processing_shizuku">Обработка разрешения Shizuku...</string>
+    <string name="grant_shizuku_hint">\nПожалуйста, предоставьте разрешение в Shizuku Manager и перезапустите этот интерфейс.</string>
+    <string name="shizuku_check_pass">\nПроверка разрешения Shizuku пройдена, запуск обнаружения доступности устройства...</string>
+    <string name="device_vulnerable">\nРезультат обнаружения: Устройство может иметь уязвимость (эксплуатируемо)</string>
+    <string name="vulnerability_fixed">\nРезультат обнаружения: Уязвимость была исправлена</string>
+    <string name="select_boot_mode">Выберите режим загрузки</string>
+    <string name="direct_boot_question">Вы хотите сразу перейти в консоль Payload в следующий раз?</string>
+    <string name="yes_direct_boot">Да, войти сразу в следующий раз</string>
+    <string name="boot_choice_saved">\nВыбор сохранен, перенаправление...</string>
+    <string name="no_keep_bootloader">Нет, оставить загрузчик в следующий раз</string>
+    <string name="redirecting">\nПеренаправление...</string>
+    <string name="check_failed">\nПроверка не удалась: %s</string>
+    <string name="shizuku_granted">Разрешение Shizuku предоставлено</string>
+    <string name="shizuku_denied">В разрешении Shizuku отказано</string>
+
+    <!-- PluginAdapter -->
+    <string name="plugin_dir">Плагины PoC</string>
+    <string name="plugin_not_found">Файл плагина не найден</string>
+    <string name="select_op">Выберите операцию</string>
+    <string name="handle_how">Как вы хотите обработать этот плагин?</string>
+    <string name="use_shizuku">Выполнить с разрешением Shizuku</string>
+    <string name="shizuku_hint">Требуется установленный и авторизованный Shizuku</string>
+    <string name="executing">Выполнение плагина</string>
+    <string name="missing">Отсутствуют необходимые файлы</string>
+    <string name="no_rish">Файл rish не найден. Пожалуйста, обновите пакет расширения для использования функций Shizuku</string>
+    <string name="update_ext">Обновить пакет расширения</string>
+    <string name="update_complete">Теперь снова войдите в эмулятор терминала для завершения обновления</string>
+    <string name="share_app">Поделиться с другими приложениями</string>
+    <string name="downloading_plugin">Загрузка</string>
+    <string name="download_done">Загрузка завершена</string>
+    <string name="download_complete_msg"> Загрузка завершена!</string>
+    <string name="cmd_end">\nКоманда завершена, код выхода: %d</string>
+    <string name="executing_title">Выполнение плагина</string>
+
+    <!-- Preferences -->
+    <string name="pref_category_runtime">Статус выполнения</string>
+    <string name="pref_runtime_status">Текущий статус</string>
+    <string name="pref_runtime_status_summary">Не запущен</string>
+    <string name="pref_log_output">Вывод лога</string>
+    <string name="pref_log_output_summary">Нет логов</string>
+
+    <string name="pref_category_network">Конфигурация сети</string>
+    <string name="pref_server_ip">IP сервера</string>
+    <string name="pref_server_ip_dialog">Установить IP сервера</string>
+    <string name="pref_server_port">Порт сервера</string>
+    <string name="pref_server_port_dialog">Установить порт сервера</string>
+
+    <string name="pref_category_injection">Инъекция</string>
+    <string name="pref_command_input">Ввод команды инъекции</string>
+    <string name="pref_command_dialog">Ввод команды Shell</string>
+    <string name="pref_uid_input">UID инъекции</string>
+    <string name="pref_uid_dialog">Введите действительный UID</string>
+    <string name="pref_gid_input">GID инъекции</string>
+    <string name="pref_gid_dialog">Введите GID</string>
+    <string name="pref_group_input">GROUP инъекции</string>
+    <string name="pref_group_dialog">Введите GROUP</string>
+    <string name="pref_selinux_policy">Политика SELinux</string>
+    <string name="pref_selinux_summary">Непрофессионалам просьба не изменять, может быть неэффективно</string>
+    <string name="pref_selinux_dialog">Введите политику</string>
+    <string name="pref_nice_name">Nice Name процесса</string>
+    <string name="pref_nice_name_dialog">Введите Nice Name</string>
+    <string name="pref_runtime_flags">Флаги выполнения (Runtime Flags)</string>
+    <string name="pref_runtime_flags_summary">Выберите флаги (например, отключение проверок Hidden API)</string>
+    <string name="pref_runtime_flags_dialog">Выберите флаги</string>
+    <string name="pref_buffer">Буфер</string>
+    <string name="pref_buffer_dialog">Введите буфер</string>
+    <string name="pref_padding">Заполнение</string>
+    <string name="pref_padding_dialog">Введите заполнение</string>
+    <string name="pref_padding2">Заполнение Часть 2</string>
+    <string name="pref_android12_warning">Предупреждение</string>
+    <string name="pref_android12_warning_summary">Вы запускаете это ПО на Android 12 и выше, пожалуйста, прочтите</string>
+    <string name="pref_terminal">Эмулятор терминала</string>
+    <string name="pref_terminal_summary">Легковесный эмулятор терминала со встроенными командами</string>
+    <string name="pref_execute_btn">Выполнить команду</string>
+    <string name="pref_execute_summary">Инъекция произойдет немедленно</string>
+
+    <string name="pref_category_server">Управление сервером</string>
+    <string name="pref_start_server">Запустить службу</string>
+    <string name="pref_start_server_summary">Запустить службу прослушивания сокетов</string>
+    <string name="pref_stop_server">Остановить службу</string>
+    <string name="pref_stop_server_summary">Остановить запущенную службу</string>
+
+    <string name="pref_advanced_trigger">Дополнительные опции</string>
+    <string name="pref_advanced_trigger_summary">Нажмите, чтобы развернуть/свернуть дополнительные настройки</string>
+    <string name="pref_category_advanced">Дополнительно</string>
+    <string name="pref_shell_terminal">Запустить удаленный терминал</string>
+    <string name="pref_shell_terminal_summary">Это крайне нестабильная функция. В случае успеха вы можете подключиться к привилегированной обратной интерактивной оболочке в Termux и других эмуляторах терминала. Разработчик не гарантирует работу этой функции на всех устройствах.</string>
+    <string name="pref_extract_data">Извлечь данные приложения</string>
+    <string name="pref_extract_data_summary">Отправить данные в приложение через сокет. Вы можете найти извлеченные данные в папке данных PoC в Android/data\nПримечание: Следующее извлечение удалит содержимое предыдущего извлечения</string>
+    <string name="pref_zygote_config">Параметры конфигурации Zygote</string>
+    <string name="pref_zygote_config_summary">Это функция не специального назначения, пожалуйста, не используйте. Все дополнительные параметры, загруженные этой функцией, могут вызвать ошибки payload, сбои отправки загрузчика и т. д.</string>
+    <string name="pref_zygote_config_dialog">Выберите параметры</string>
+
+    <!-- Language Settings -->
+    <string name="pref_category_language">Языковые настройки</string>
+    <string name="pref_language">Язык</string>
+    <string name="pref_language_summary">Выберите язык приложения</string>
+    <string name="pref_language_dialog">Выберите язык</string>
+    <string name="language_system">Системный</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese_simplified">Упрощенный китайский</string>
+    <string name="language_chinese_traditional">Традиционный китайский</string>
+    <string name="language_japanese">Японский</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_spanish">Испанский</string>
+    <string name="language_french">Французский</string>
+
+    <!-- Theme Settings -->
+    <string name="pref_category_appearance">Внешний вид</string>
+    <string name="pref_theme">Стиль темы</string>
+    <string name="pref_theme_summary">Выберите предпочитаемую тему</string>
+    <string name="pref_theme_dialog">Выберите тему</string>
+    <string name="theme_default">По умолчанию</string>
+    <string name="theme_transparent">Прозрачная (Эффект размытия)</string>
+    <string name="theme_changed">Тема изменена, перезапуск приложения...</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Настройки</string>
+    <string name="pref_category_other">Другое</string>
+    <string name="pref_app_version">Версия приложения</string>
+    <string name="pref_app_selector">Селектор приложений</string>
+    <string name="pref_app_selector_summary">Выберите приложение для инъекции через список приложений</string>
+    <string name="pref_about">О приложении</string>
+    <string name="pref_about_summary">Просмотр информации о приложении</string>
+    <string name="language_changed">Язык изменен, перезапуск приложения...</string>
+
+    <!-- App Selector Bottom Sheet -->
+    <string name="select_app">Выберите приложение</string>
+    <string name="search_app">Поиск приложений...</string>
+    <string name="app_icon">Иконка приложения</string>
+    <string name="selected_app">Выбранное приложение</string>
+    <string name="loading_apps">Загрузка приложений...</string>
+    <string name="no_apps_found">Приложения не найдены</string>
+
+    <!-- Menu -->
+    <string name="menu_zygote_log">Слушатель логов Zygote</string>
+    <string name="menu_check_update">Проверить обновления</string>
+    <string name="menu_about">О приложении</string>
+    <string name="menu_settings">Настройки</string>
+
+    <!-- AppDetailActivity -->
+    <string name="app_not_found_toast">Приложение не найдено</string>
+    <string name="app_authorized">Авторизовано</string>
+    <string name="app_unauthorized">Не авторизовано</string>
+    <string name="app_status_toast">Приложение %s</string>
+
+    <!-- runpayload.java -->
+    <string name="runpayload_cant_create_temp_file">Невозможно создать временный файл</string>
+    <string name="runpayload_no_file_or_text">Файл или текст не получены</string>
+    <string name="runpayload_confirm_load_third_party">Вы уверены, что хотите загрузить сторонний payload?</string>
+    <string name="runpayload_payload_path_source">Источник пути payload:</string>
+    <string name="runpayload_run_payload">Запустить Payload</string>
+    <string name="runpayload_cancel">Отмена</string>
+    <string name="runpayload_cant_open_file">Невозможно открыть файл</string>
+    <string name="runpayload_read_failed">Ошибка чтения:</string>
+    <string name="runpayload_process_failed">Ошибка обработки:</string>
+    <string name="runpayload_payload_loaded_successfully">Payload успешно загружен</string>
+    <string name="runpayload_payload_load_failed">Не удалось загрузить payload</string>
+    <string name="runpayload_vulnerability_deployment_ended">Развертывание уязвимости завершено:</string>
+   <string name="zygote_activity_tab_payload">payload</string>
+    <string name="zygote_activity_tab_log">Лог Zygote</string>
+    <string name="zygote_activity_tab_auth">Авторизация</string>
+
+    <!-- FolderReceiver.java -->
+    <string name="folder_receiver_service_running">Служба приема уже запущена</string>
+    <string name="folder_receiver_waiting_for_connection">Ожидание подключения клиента к порту %d...</string>
+    <string name="folder_receiver_server_start_failed">Ошибка запуска сервера: %s</string>
+    <string name="folder_receiver_starting_file_receive">Начало приема файлов...</string>
+    <string name="folder_receiver_receiving_file_progress">Прием файла: %s (%s)\nПрогресс: %d/%d</string>
+    <string name="folder_receiver_creating_directory">Создание каталога: %s</string>
+    <string name="folder_receiver_receive_complete">Прием файлов завершен, всего получено файлов: %d</string>
+    <string name="folder_receiver_ready_for_next">Готов к следующей передаче...</string>
+    <string name="folder_receiver_receive_error">Ошибка приема файла: %s</string>
+    <string name="folder_receiver_progress_dialog_title">Прием данных приложения</string>
+
+    <!-- ZygoteFragment.java -->
+    <string name="zygote_fragment_no_logs">Нет логов</string>
+    <string name="zygote_fragment_poc_exit">выход poc:</string>
+    <string name="zygote_fragment_selected_app">Выбранное приложение</string>
+
+    <!-- Agreement Activity -->
+    <string name="twrp_header_title">Проверка безопасности</string>
+    <string name="twrp_risk_hint">Введите \"I know the risk\" для продолжения</string>
+    <string name="twrp_required_text">I know the risk</string>
+    <string name="twrp_swipe_text">Проведите, чтобы принять и войти</string>
+
+    <string name="disclaimer_title">ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ И ПРЕДУПРЕЖДЕНИЕ</string>
+    <string name="disclaimer_content">Этот инструмент (PoC-Deployer-System) включает расширенные модификации системы, включая инъекцию Zygote и манипуляции с ядром.\n\nРазблокируя, вы соглашаетесь с тем, что:\n1. Вы несете полную ответственность за любой ущерб вашему устройству (циклические перезагрузки, кирпич, потеря данных).\n2. Разработчик НЕ несет ответственности за любые последствия использования этого программного обеспечения.\n3. Вы понимаете, что это бета-версия, предназначенная только для тестирования и образовательных целей.\n\nЕсли вы не согласны, немедленно удалите это приложение.</string>
+
+</resources>

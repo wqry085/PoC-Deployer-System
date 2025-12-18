@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'kotlin-android'
 }
 
 android {
@@ -14,28 +15,19 @@ android {
     lintOptions {
         abortOnError false
     }
-    
+   
     defaultConfig {
         applicationId "com.wqry085.deployesystem"
         minSdk 28
         targetSdk 28
-        versionCode 8
-        versionName "1.5.6"
+        versionCode 9
+        versionName "1.5.7"
         
         vectorDrawables { 
             useSupportLibrary true
         }
     }
 
-    // 添加签名配置
-    signingConfigs {
-        release {
-            storeFile file('jks/wqry085.jks')  // JKS文件路径
-            storePassword 'xxxxxx'       // 密钥库密码
-            keyAlias 'xxxxxx'                 // 别名
-            keyPassword 'xxxxxxx'         // 密钥密码
-        }
-    }
 
     buildTypes {
         release {
@@ -55,6 +47,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    
+  tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+  kotlinOptions {
+    jvmTarget = "11"
+  }
+}
 
     buildFeatures {
         viewBinding true
@@ -73,7 +71,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
-    
+
     // 添加 Termux 模块依赖
     implementation project(":terminal-view")
     implementation project(":terminal-emulator")

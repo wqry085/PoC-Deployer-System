@@ -1,324 +1,175 @@
 package com.wqry085.deployesystem.sockey;
 
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.wqry085.deployesystem.R;
+
 import java.io.*;
+import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.CRC32;
 
 public class FolderReceiver {
     private static final String TAG = "FolderReceiver";
-    private static final int PORT = 56423;
-    
-    private Context context;
-    private ProgressDialog progressDialog;
-    private AlertDialog resultDialog;
-    private volatile boolean isReceiving = false;
-    private Handler mainHandler;
-    private ServerSocket serverSocket;
-    private ExecutorService networkExecutor;
     
     // 协议常量
+    private static final String PROTOCOL_MAGIC = "ZFTP";
+    private static final int PROTOCOL_VERSION = 0x0002;
+    private static final int HEADER_SIZE = 32;
+    
     private static final byte TYPE_FILE = 0x01;
     private static final byte TYPE_DIRECTORY = 0x02;
+    private static final byte TYPE_END = (byte) 0xFF;
+    
+    private static final byte CHECKSUM_NONE = 0x00;
+    private static final byte CHECKSUM_CRC32 = 0x01;
+    
+    // 配置
+    private static final int DEFAULT_PORT = 56423;
+    private static final int SOCKET_TIMEOUT_MS = 30000;
+    private static final int BUFFER_SIZE = 64 * 1024;
+    
+    // 状态
+    private final WeakReference<Activity> activityRef;
+    private final Context appContext;
+    private final Handler mainHandler;
+    private final ExecutorService executor;
+    private final int port;
+    
+    private volatile boolean isReceiving = false;
+    private volatile boolean isCancelled = false;
+    private ServerSocket serverSocket;
+    private ProgressDialog progressDialog;
+    
+    private TransferStats currentStats;
+    private TransferCallback callback;
+    
+    // 回调接口
+    public interface TransferCallback {
+        void onServerStarted(int port);
+        void onServerStopped();
+        void onTransferStarted(int totalFiles, int totalDirs, long totalSize);
+        void onFileReceived(String path, long size, int current, int total);
+        void onDirectoryCreated(String path);
+        void onTransferComplete(TransferStats stats);
+        void onTransferError(String error);
+    }
+    
+    // 简化的回调适配器（可选实现）
+    public static class SimpleCallback implements TransferCallback {
+        @Override public void onServerStarted(int port) {}
+        @Override public void onServerStopped() {}
+        @Override public void onTransferStarted(int totalFiles, int totalDirs, long totalSize) {}
+        @Override public void onFileReceived(String path, long size, int current, int total) {}
+        @Override public void onDirectoryCreated(String path) {}
+        @Override public void onTransferComplete(TransferStats stats) {}
+        @Override public void onTransferError(String error) {}
+    }
+    
+    // 传输统计类
+    public static class TransferStats {
+        public int filesReceived;
+        public int dirsCreated;
+        public long bytesReceived;
+        public long duration;
+        public int checksumErrors;
+        
+        public double getSpeedMBps() {
+            if (duration <= 0) return 0;
+            return (bytesReceived / (1024.0 * 1024.0)) / (duration / 1000.0);
+        }
+        
+        public static String formatSize(long size) {
+            if (size < 1024) return size + " B";
+            if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
+            if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024.0));
+            return String.format("%.2f GB", size / (1024.0 * 1024.0 * 1024.0));
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("Files: %d, Dirs: %d, Size: %s, Speed: %.2f MB/s",
+                    filesReceived, dirsCreated, formatSize(bytesReceived), getSpeedMBps());
+        }
+    }
+    
+    // ==================== 构造函数 ====================
+    
+    public FolderReceiver(Activity activity) {
+        this(activity, DEFAULT_PORT);
+    }
+    
+    public FolderReceiver(Activity activity, int port) {
+        this.activityRef = new WeakReference<>(activity);
+        this.appContext = activity.getApplicationContext();
+        this.port = port;
+        this.mainHandler = new Handler(Looper.getMainLooper());
+        this.executor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "FolderReceiver");
+            t.setPriority(Thread.NORM_PRIORITY);
+            return t;
+        });
+    }
     
     public FolderReceiver(Context context) {
-        this.context = context;
-        this.mainHandler = new Handler(Looper.getMainLooper());
-        this.networkExecutor = Executors.newSingleThreadExecutor();
+        this(context, DEFAULT_PORT);
     }
+    
+    public FolderReceiver(Context context, int port) {
+        if (context instanceof Activity) {
+            this.activityRef = new WeakReference<>((Activity) context);
+        } else {
+            this.activityRef = new WeakReference<>(null);
+        }
+        this.appContext = context.getApplicationContext();
+        this.port = port;
+        this.mainHandler = new Handler(Looper.getMainLooper());
+        this.executor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "FolderReceiver");
+            t.setPriority(Thread.NORM_PRIORITY);
+            return t;
+        });
+    }
+    
+    public void setCallback(TransferCallback callback) {
+        this.callback = callback;
+    }
+    
+    public int getPort() {
+        return port;
+    }
+    
+    // ==================== 公开方法 ====================
     
     public void startReceiving() {
         if (isReceiving) {
-            showToast("接收服务已在运行中");
+            showToast(getString(R.string.folder_receiver_service_running));
             return;
         }
         
-        networkExecutor.execute(this::startReceivingInternal);
-    }
-    
-    private void startReceivingInternal() {
-        isReceiving = true;
-        showWaitingDialog("等待客户端连接端口 " + PORT + "...");
-        Log.i(TAG, "开始监听端口 " + PORT);
-        
-        try {
-            serverSocket = new ServerSocket(PORT);
-            serverSocket.setSoTimeout(1000); // 1秒超时，用于检查取消状态
-            
-            while (isReceiving) {
-                try {
-                    Socket clientSocket = serverSocket.accept();
-                    Log.i(TAG, "客户端已连接: " + clientSocket.getInetAddress());
-                    
-                    // 处理文件传输
-                    handleFileTransfer(clientSocket);
-                    
-                } catch (java.net.SocketTimeoutException e) {
-                    // 超时，继续循环检查取消状态
-                    continue;
-                } catch (IOException e) {
-                    if (isReceiving) {
-                        Log.e(TAG, "接受连接错误: " + e.getMessage());
-                    }
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "服务器启动失败: " + e.getMessage());
-            showToast("服务器启动失败: " + e.getMessage());
-        } finally {
-            closeServerSocket();
-            isReceiving = false;
-            dismissWaitingDialog();
-            Log.i(TAG, "接收服务已停止");
-        }
-    }
-    
-    private void handleFileTransfer(Socket clientSocket) {
-        String baseDir = context.getExternalFilesDir(null).getAbsolutePath();
-        int totalFiles = 0;
-        int receivedFiles = 0;
-        
-        Log.i(TAG, "开始接收文件，保存路径: " + baseDir);
-        updateProgressDialog("开始接收文件...", 0, 100);
-        
-        try {
-            InputStream inputStream = clientSocket.getInputStream();
-            BufferedInputStream bis = new BufferedInputStream(inputStream);
-            
-            while (isReceiving) {
-                // 读取类型字节
-                int typeByte = bis.read();
-                if (typeByte == -1) {
-                    Log.i(TAG, "流结束，传输完成");
-                    break; // 正常结束
-                }
-                
-                byte type = (byte) typeByte;
-                Log.d(TAG, "读取类型: " + type);
-                
-                // 读取路径长度 (4字节，大端序)
-                byte[] pathLenBytes = readExactly(bis, 4);
-                if (pathLenBytes == null) break;
-                
-                int pathLength = ByteBuffer.wrap(pathLenBytes)
-                                         .order(ByteOrder.BIG_ENDIAN)
-                                         .getInt();
-                Log.d(TAG, "路径长度: " + pathLength);
-                
-                if (pathLength <= 0 || pathLength > 8192) {
-                    Log.e(TAG, "无效的路径长度: " + pathLength);
-                    break;
-                }
-                
-                // 读取路径
-                byte[] pathBytes = readExactly(bis, pathLength);
-                if (pathBytes == null) break;
-                
-                String relativePath = new String(pathBytes, "UTF-8");
-                Log.d(TAG, "相对路径: " + relativePath);
-                
-                // 读取数据长度 (8字节，大端序)
-                byte[] dataLenBytes = readExactly(bis, 8);
-                if (dataLenBytes == null) break;
-                
-                long dataLength = ByteBuffer.wrap(dataLenBytes)
-                                          .order(ByteOrder.BIG_ENDIAN)
-                                          .getLong();
-                Log.d(TAG, "数据长度: " + dataLength);
-                
-                String fullPath = baseDir + File.separator + relativePath;
-                
-                if (type == TYPE_FILE) {
-                    totalFiles++;
-                    receivedFiles++;
-                    
-                    // 更新UI
-                    final String status = String.format("接收文件: %s (%s)\n进度: %d/%d", 
-                            relativePath, formatFileSize(dataLength), receivedFiles, totalFiles);
-                    
-                    updateProgressDialog(status, (receivedFiles * 100) / Math.max(totalFiles, 1), 100);
-                    
-                    Log.i(TAG, "接收文件: " + relativePath + " 大小: " + dataLength + " bytes");
-                    
-                    // 创建父目录
-                    File file = new File(fullPath);
-                    File parentDir = file.getParentFile();
-                    if (parentDir != null && !parentDir.exists()) {
-                        if (!parentDir.mkdirs()) {
-                            Log.e(TAG, "创建目录失败: " + parentDir.getAbsolutePath());
-                            break;
-                        }
-                    }
-                    
-                    // 接收文件内容
-                    if (!receiveFileContent(bis, file, dataLength)) {
-                        Log.e(TAG, "文件内容接收失败: " + relativePath);
-                        break;
-                    }
-                    
-                    Log.i(TAG, "文件接收完成: " + relativePath);
-                    
-                } else if (type == TYPE_DIRECTORY) {
-                    Log.i(TAG, "创建目录: " + relativePath);
-                    
-                    File dir = new File(fullPath);
-                    if (!dir.exists() && !dir.mkdirs()) {
-                        Log.e(TAG, "创建目录失败: " + fullPath);
-                        break;
-                    }
-                    
-                    // 更新UI显示目录创建
-                    updateProgressDialog("创建目录: " + relativePath, 
-                                       (receivedFiles * 100) / Math.max(totalFiles, 1), 100);
-                } else {
-                    Log.e(TAG, "未知的类型: " + type);
-                    break;
-                }
-            }
-            
-            // 传输完成
-            if (isReceiving) {
-                final int finalReceived = receivedFiles;
-                mainHandler.post(() -> {
-                    showToast("文件接收完成，共接收 " + finalReceived + " 个文件");
-                    // 恢复等待状态
-                    showWaitingDialog("准备接收下一次传输...");
-                });
-                Log.i(TAG, "文件接收完成，总计: " + receivedFiles + " 个文件");
-            }
-            
-        } catch (IOException e) {
-            Log.e(TAG, "文件传输错误: " + e.getMessage());
-            showToast("文件接收错误: " + e.getMessage());
-        } finally {
-            try {
-                clientSocket.close();
-            } catch (IOException e) {
-                Log.e(TAG, "关闭客户端socket错误: " + e.getMessage());
-            }
-        }
-    }
-    
-    private byte[] readExactly(InputStream is, int length) throws IOException {
-        byte[] buffer = new byte[length];
-        int totalRead = 0;
-        
-        while (totalRead < length && isReceiving) {
-            int read = is.read(buffer, totalRead, length - totalRead);
-            if (read == -1) {
-                Log.e(TAG, "流提前结束，期望读取 " + length + " 字节，实际读取 " + totalRead + " 字节");
-                return null;
-            }
-            totalRead += read;
-        }
-        
-        return totalRead == length ? buffer : null;
-    }
-    
-    private boolean receiveFileContent(InputStream is, File file, long dataLength) {
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            byte[] buffer = new byte[8192];
-            long totalRead = 0;
-            
-            while (totalRead < dataLength && isReceiving) {
-                int toRead = (int) Math.min(buffer.length, dataLength - totalRead);
-                int read = is.read(buffer, 0, toRead);
-                
-                if (read == -1) {
-                    Log.e(TAG, "文件内容读取提前结束");
-                    return false;
-                }
-                
-                fos.write(buffer, 0, read);
-                totalRead += read;
-                
-                // 大文件进度更新（每1MB更新一次）
-                if (dataLength > 1024 * 1024 && totalRead % (1024 * 1024) == 0) {
-                    int progress = (int) ((totalRead * 100) / dataLength);
-                    Log.d(TAG, "文件传输进度: " + progress + "%");
-                }
-            }
-            
-            return totalRead == dataLength;
-        } catch (IOException e) {
-            Log.e(TAG, "写入文件错误: " + e.getMessage());
-            return false;
-        }
+        isCancelled = false;
+        executor.execute(this::receiveLoop);
     }
     
     public void stopReceiving() {
+        isCancelled = true;
         isReceiving = false;
         closeServerSocket();
-        dismissWaitingDialog();
-    }
-    
-    private void closeServerSocket() {
-        if (serverSocket != null) {
-            try {
-                serverSocket.close();
-            } catch (IOException e) {
-                Log.e(TAG, "关闭服务器socket错误: " + e.getMessage());
-            }
-            serverSocket = null;
-        }
-    }
-    
-    private void showWaitingDialog(String message) {
-        mainHandler.post(() -> {
-            dismissWaitingDialog();
-        });
-    }
-    
-    private void updateProgressDialog(String message, int progress, int max) {
-        mainHandler.post(() -> {
-            if (progressDialog == null) {
-                progressDialog = new ProgressDialog(context);
-                progressDialog.setTitle("应用数据接收");
-                progressDialog.setCancelable(true);
-                progressDialog.setCanceledOnTouchOutside(false);
-                progressDialog.setOnCancelListener(dialog -> stopReceiving());
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                progressDialog.setMax(max);
-            }
-            
-            progressDialog.setMessage(message);
-            progressDialog.setProgress(progress);
-            
-            if (!progressDialog.isShowing()) {
-                progressDialog.show();
-            }
-        });
-    }
-    
-    private void dismissWaitingDialog() {
-        mainHandler.post(() -> {
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-                progressDialog = null;
-            }
-        });
-    }
-    
-    private void showToast(String message) {
-        mainHandler.post(() -> {
-            android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show();
-        });
-    }
-    
-    private String formatFileSize(long size) {
-        if (size < 1024) return size + " B";
-        else if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
-        else return String.format("%.1f MB", size / (1024.0 * 1024.0));
+        dismissProgressDialog();
     }
     
     public boolean isReceiving() {
@@ -327,8 +178,463 @@ public class FolderReceiver {
     
     public void release() {
         stopReceiving();
-        if (networkExecutor != null) {
-            networkExecutor.shutdownNow();
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    // ==================== 接收循环 ====================
+    
+    private void receiveLoop() {
+        isReceiving = true;
+        
+        try {
+            serverSocket = new ServerSocket(port);
+            serverSocket.setReuseAddress(true);
+            serverSocket.setSoTimeout(1000);
+            
+            Log.i(TAG, "Server started on port " + port);
+            
+            // ✅ 只发通知/回调，不显示弹窗
+            notifyServerStarted();
+            
+            while (!isCancelled) {
+                try {
+                    Socket client = serverSocket.accept();
+                    client.setSoTimeout(SOCKET_TIMEOUT_MS);
+                    client.setReceiveBufferSize(256 * 1024);
+                    
+                    Log.i(TAG, "Client connected: " + client.getInetAddress());
+                    handleClient(client);
+                    
+                } catch (SocketTimeoutException e) {
+                    // 正常超时，继续循环
+                }
+            }
+            
+        } catch (IOException e) {
+            if (!isCancelled) {
+                Log.e(TAG, "Server error: " + e.getMessage());
+                notifyError("Server error: " + e.getMessage());
+            }
+        } finally {
+            closeServerSocket();
+            isReceiving = false;
+            notifyServerStopped();
+            Log.i(TAG, "Server stopped");
+        }
+    }
+    
+    // ==================== 客户端处理 ====================
+    
+    private void handleClient(Socket client) {
+        String saveDir = appContext.getExternalFilesDir(null).getAbsolutePath();
+        currentStats = new TransferStats();
+        long startTime = System.currentTimeMillis();
+        
+        try (BufferedInputStream bis = new BufferedInputStream(
+                client.getInputStream(), BUFFER_SIZE)) {
+            
+            // 1. 读取并验证协议头
+            ProtocolHeader header = readHeader(bis);
+            if (header == null) {
+                notifyError("Invalid protocol header");
+                return;
+            }
+            
+            Log.i(TAG, String.format("Transfer started: %d files, %d dirs, %s",
+                    header.totalFiles, header.totalDirs, 
+                    TransferStats.formatSize(header.totalSize)));
+            
+            // ✅ 开始接收时显示进度弹窗
+            notifyTransferStarted(header.totalFiles, header.totalDirs, header.totalSize);
+            showProgressDialog(
+                    getString(R.string.folder_receiver_starting_file_receive),
+                    0, 
+                    header.totalFiles + header.totalDirs
+            );
+            
+            // 2. 接收条目
+            int entryCount = 0;
+            while (!isCancelled) {
+                int typeByte = bis.read();
+                if (typeByte == -1) {
+                    Log.w(TAG, "Unexpected end of stream");
+                    break;
+                }
+                
+                byte type = (byte) typeByte;
+                
+                if (type == TYPE_END) {
+                    Log.i(TAG, "End marker received");
+                    break;
+                }
+                
+                if (type != TYPE_FILE && type != TYPE_DIRECTORY) {
+                    Log.e(TAG, "Unknown entry type: " + type);
+                    break;
+                }
+                
+                EntryResult result = readEntry(bis, type, header.checksumType, saveDir);
+                if (result == null) {
+                    Log.e(TAG, "Failed to read entry");
+                    break;
+                }
+                
+                entryCount++;
+                updateProgress(result.path, entryCount, header.totalFiles + header.totalDirs);
+                
+                if (type == TYPE_FILE) {
+                    currentStats.filesReceived++;
+                    currentStats.bytesReceived += result.size;
+                    notifyFileReceived(result.path, result.size, 
+                            currentStats.filesReceived, header.totalFiles);
+                } else {
+                    currentStats.dirsCreated++;
+                    notifyDirectoryCreated(result.path);
+                }
+            }
+            
+            // 3. 完成
+            currentStats.duration = System.currentTimeMillis() - startTime;
+            
+            // ✅ 接收完成，关闭弹窗
+            dismissProgressDialog();
+            
+            if (!isCancelled) {
+                Log.i(TAG, "Transfer complete: " + currentStats);
+                notifyTransferComplete(currentStats);
+                
+                // 显示完成提示
+                showToast(String.format(
+                        getString(R.string.folder_receiver_receive_complete),
+                        currentStats.filesReceived
+                ));
+            }
+            
+        } catch (IOException e) {
+            Log.e(TAG, "Transfer error: " + e.getMessage());
+            dismissProgressDialog();
+            notifyError("Transfer error: " + e.getMessage());
+        } finally {
+            try {
+                client.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Error closing client: " + e.getMessage());
+            }
+            // ✅ 不再显示等待弹窗，服务继续后台运行
+        }
+    }
+    
+    // ==================== 协议头解析 ====================
+    
+    private static class ProtocolHeader {
+        int totalFiles;
+        int totalDirs;
+        long totalSize;
+        byte checksumType;
+    }
+    
+    private ProtocolHeader readHeader(InputStream is) throws IOException {
+        byte[] headerBytes = readExactly(is, HEADER_SIZE);
+        if (headerBytes == null) {
+            return null;
+        }
+        
+        ByteBuffer buf = ByteBuffer.wrap(headerBytes).order(ByteOrder.BIG_ENDIAN);
+        
+        byte[] magic = new byte[4];
+        buf.get(magic);
+        if (!PROTOCOL_MAGIC.equals(new String(magic, StandardCharsets.US_ASCII))) {
+            Log.e(TAG, "Invalid magic: " + new String(magic));
+            return null;
+        }
+        
+        int version = buf.getShort() & 0xFFFF;
+        if (version > PROTOCOL_VERSION) {
+            Log.w(TAG, "Newer protocol version: " + version);
+        }
+        
+        ProtocolHeader header = new ProtocolHeader();
+        buf.getShort();  // flags
+        header.totalFiles = buf.getInt();
+        header.totalDirs = buf.getInt();
+        header.totalSize = buf.getLong();
+        header.checksumType = buf.get();
+        
+        return header;
+    }
+    
+    // ==================== 条目解析 ====================
+    
+    private static class EntryResult {
+        String path;
+        long size;
+        boolean checksumValid;
+    }
+    
+    private EntryResult readEntry(InputStream is, byte type, byte checksumType, 
+                                  String baseDir) throws IOException {
+        byte[] pathLenBytes = readExactly(is, 2);
+        if (pathLenBytes == null) return null;
+        
+        int pathLength = ByteBuffer.wrap(pathLenBytes)
+                .order(ByteOrder.BIG_ENDIAN)
+                .getShort() & 0xFFFF;
+        
+        if (pathLength <= 0 || pathLength > 4096) {
+            return null;
+        }
+        
+        byte[] pathBytes = readExactly(is, pathLength);
+        if (pathBytes == null) return null;
+        
+        String relativePath = new String(pathBytes, StandardCharsets.UTF_8);
+        
+        if (relativePath.contains("..") || relativePath.startsWith("/")) {
+            return null;
+        }
+        
+        byte[] dataLenBytes = readExactly(is, 8);
+        if (dataLenBytes == null) return null;
+        
+        long dataLength = ByteBuffer.wrap(dataLenBytes)
+                .order(ByteOrder.BIG_ENDIAN)
+                .getLong();
+        
+        long expectedCrc = 0;
+        if (checksumType == CHECKSUM_CRC32) {
+            byte[] crcBytes = readExactly(is, 4);
+            if (crcBytes == null) return null;
+            expectedCrc = ByteBuffer.wrap(crcBytes)
+                    .order(ByteOrder.BIG_ENDIAN)
+                    .getInt() & 0xFFFFFFFFL;
+        }
+        
+        String fullPath = baseDir + File.separator + relativePath;
+        EntryResult result = new EntryResult();
+        result.path = relativePath;
+        result.size = dataLength;
+        result.checksumValid = true;
+        
+        if (type == TYPE_DIRECTORY) {
+            File dir = new File(fullPath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+        } else if (type == TYPE_FILE) {
+            File file = new File(fullPath);
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+            
+            result.checksumValid = receiveFileContent(is, file, dataLength, 
+                    checksumType == CHECKSUM_CRC32, expectedCrc);
+            
+            if (!result.checksumValid) {
+                currentStats.checksumErrors++;
+            }
+        }
+        
+        return result;
+    }
+    
+    private boolean receiveFileContent(InputStream is, File file, long dataLength,
+                                       boolean verifyCrc, long expectedCrc) throws IOException {
+        CRC32 crc = verifyCrc ? new CRC32() : null;
+        
+        try (FileOutputStream fos = new FileOutputStream(file);
+             BufferedOutputStream bos = new BufferedOutputStream(fos, BUFFER_SIZE)) {
+            
+            byte[] buffer = new byte[BUFFER_SIZE];
+            long remaining = dataLength;
+            
+            while (remaining > 0 && !isCancelled) {
+                int toRead = (int) Math.min(buffer.length, remaining);
+                int read = is.read(buffer, 0, toRead);
+                
+                if (read == -1) {
+                    return false;
+                }
+                
+                bos.write(buffer, 0, read);
+                
+                if (crc != null) {
+                    crc.update(buffer, 0, read);
+                }
+                
+                remaining -= read;
+            }
+            
+            bos.flush();
+        }
+        
+        return crc == null || crc.getValue() == expectedCrc;
+    }
+    
+    // ==================== 工具方法 ====================
+    
+    private byte[] readExactly(InputStream is, int length) throws IOException {
+        byte[] buffer = new byte[length];
+        int totalRead = 0;
+        
+        while (totalRead < length && !isCancelled) {
+            int read = is.read(buffer, totalRead, length - totalRead);
+            if (read == -1) {
+                return null;
+            }
+            totalRead += read;
+        }
+        
+        return isCancelled ? null : buffer;
+    }
+    
+    private void closeServerSocket() {
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Error closing server: " + e.getMessage());
+            }
+            serverSocket = null;
+        }
+    }
+    
+    private String getString(int resId) {
+        return appContext.getString(resId);
+    }
+    
+    private String getString(int resId, Object... args) {
+        return appContext.getString(resId, args);
+    }
+    
+    private Activity getActivity() {
+        return activityRef.get();
+    }
+    
+    private boolean isActivityValid() {
+        Activity activity = getActivity();
+        return activity != null && !activity.isFinishing() && !activity.isDestroyed();
+    }
+    
+    // ==================== UI 方法 ====================
+    
+    private void showProgressDialog(String message, int progress, int max) {
+        mainHandler.post(() -> {
+            if (!isActivityValid()) {
+                return;
+            }
+            
+            try {
+                dismissProgressDialogInternal();
+                
+                Activity activity = getActivity();
+                progressDialog = new ProgressDialog(activity);
+                progressDialog.setTitle(getString(R.string.folder_receiver_progress_dialog_title));
+                progressDialog.setMessage(message);
+                progressDialog.setCancelable(true);
+                progressDialog.setOnCancelListener(d -> {
+                    isCancelled = true;
+                    showToast("Transfer cancelled");
+                });
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progressDialog.setMax(max);
+                progressDialog.setProgress(progress);
+                progressDialog.show();
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot show progress dialog: " + e.getMessage());
+            }
+        });
+    }
+    
+    private void updateProgress(String path, int current, int total) {
+        mainHandler.post(() -> {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                // 只显示文件名，不显示完整路径
+                String fileName = path;
+                int lastSlash = path.lastIndexOf('/');
+                if (lastSlash >= 0 && lastSlash < path.length() - 1) {
+                    fileName = path.substring(lastSlash + 1);
+                }
+                progressDialog.setMessage(fileName);
+                progressDialog.setProgress(current);
+            }
+        });
+    }
+    
+    private void dismissProgressDialog() {
+        mainHandler.post(this::dismissProgressDialogInternal);
+    }
+    
+    private void dismissProgressDialogInternal() {
+        if (progressDialog != null) {
+            try {
+                if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+            progressDialog = null;
+        }
+    }
+    
+    private void showToast(String message) {
+        mainHandler.post(() -> {
+            Toast.makeText(appContext, message, Toast.LENGTH_SHORT).show();
+        });
+    }
+    
+    // ==================== 回调通知 ====================
+    
+    private void notifyServerStarted() {
+        if (callback != null) {
+            mainHandler.post(() -> callback.onServerStarted(port));
+        }
+        // 可选：显示 Toast 提示服务已启动
+        // showToast("Receiver ready on port " + port);
+    }
+    
+    private void notifyServerStopped() {
+        if (callback != null) {
+            mainHandler.post(() -> callback.onServerStopped());
+        }
+    }
+    
+    private void notifyTransferStarted(int files, int dirs, long size) {
+        if (callback != null) {
+            mainHandler.post(() -> callback.onTransferStarted(files, dirs, size));
+        }
+    }
+    
+    private void notifyFileReceived(String path, long size, int current, int total) {
+        if (callback != null) {
+            mainHandler.post(() -> callback.onFileReceived(path, size, current, total));
+        }
+    }
+    
+    private void notifyDirectoryCreated(String path) {
+        if (callback != null) {
+            mainHandler.post(() -> callback.onDirectoryCreated(path));
+        }
+    }
+    
+    private void notifyTransferComplete(TransferStats stats) {
+        if (callback != null) {
+            mainHandler.post(() -> callback.onTransferComplete(stats));
+        }
+    }
+    
+    private void notifyError(String error) {
+        if (callback != null) {
+            mainHandler.post(() -> callback.onTransferError(error));
         }
     }
 }

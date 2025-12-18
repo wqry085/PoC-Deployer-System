@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PoC-Deployer-System</string>
+
+    <!-- AboutActivity -->
+    <string name="about_category">關於應用</string>
+    <string name="cve_title">漏洞 CVE-2024-31317 使用工具</string>
+    <string name="beta_desc">此版本為測試版，目的是收集報告。\n請將你遇到的問題回饋至：wqry085super@gmail.com</string>
+    <string name="dev_category">開發者</string>
+    <string name="dev_home">開發者酷安主頁</string>
+    <string name="project_category">專案</string>
+<string name="pref_app_selector">透過列表選擇</string>
+<string name="pref_app_selector_summary">透過應用列表選擇要注入的應用程式</string>
+    <!-- ZygoteActivity - Dialogs -->
+    <string name="apply">應用</string>
+    <string name="cancel">取消</string>
+    <string name="no_update_desc">無更新說明</string>
+    <string name="latest_version">目前已是最新版本</string>
+    <string name="check_update_failed">檢查更新失敗：%s</string>
+    <string name="found_new_version">發現新版本 v%s</string>
+    <string name="download_now">立即下載</string>
+    <string name="later">稍後再說</string>
+    <string name="downloading">正在下載更新 v%s</string>
+    <string name="download_complete">下載完成！是否立即安裝？</string>
+    <string name="download_failed">下載失敗：%s</string>
+    <string name="update_downloaded">已下載更新 v%s</string>
+    <string name="install_ask">檢測到已下載的更新包，是否安裝？</string>
+    <string name="install">安裝</string>
+    <string name="start_install_error">無法啟動安裝：%s</string>
+    <string name="install_later">稍後安裝</string>
+    <string name="download_complete_title">下載完成</string>
+
+    <!-- TerminalActivity -->
+    <string name="clipboard_label">終端輸出</string>
+    <string name="deploy_env">=== 正在部署終端環境 ===</string>
+    <string name="wait_msg">請稍候，這可能需要一些時間...</string>
+    <string name="deploy_success">=== 部署完成 ===</string>
+    <string name="deploy_fail">=== 環境部署失敗 ===</string>
+    <string name="basic_mode">您目前處於基礎系統模式。</string>
+    <string name="verify_fail">錯誤：增強環境驗證失敗，保持基礎模式</string>
+<string name="zygotelog_help">這將從本地啟動一個socket監聽zygote日誌服務，需要授權程式Shizuku權限\n\n啟動成功後在終端模擬器輸入 nc 127.0.0.1 13568\n控制台內部輸入 STOP 結束日誌\n透過 TRY_GREP/TRY_PID 命令切換工作模式</string>
+    <!-- MaterialDialogHelper -->
+    <string name="confirm">確定</string>
+    <string name="agree">確認</string>
+
+    <!-- ZygoteFragment -->
+    <string name="miui_restrict_warning">MIUI與澎湃套殼對adb進行了限制\n無權修改系統設定和模擬點擊剝奪了Shell的WRITE_SECURE_SETTINGS權限\n這是致命的沒有WRITE_SECURE_SETTINGS權限Shell無法修改hidden_api_blacklist_exemptions導致注入無法發生\n請進入設定在開發者選項中打開USB安全設定來恢復Shell權利\n同類型裝置如OPPO請禁止權限監控</string>
+    <string name="beta_warning_title">警告</string>
+    <string name="beta_warning_msg">這是一個非公測版本很多功能都沒實現請你做好出現zygote亂序甚至zygote損壞和雙清的風險 如了解請繼續</string>
+    <string name="create_remote">建立遠端終端</string>
+    <string name="create_msg">確定嗎應用會嘗試使用uid(%s)建立遠端終端 建立前請確保之前的遠端終端已結束</string>
+    <string name="create_done">建立結束</string>
+    <string name="success_hint">如成功請在任意終端模擬器執行nc 127.0.0.1 8080</string>
+    <string name="warning">警告</string>
+    <string name="android12_warn">在Android12及以上，情況變得非常複雜，命令解析現在由NativeCommandBuffer完成，即該解析器在解析一次內容之後，對於未識別的trailing內容，它將丟棄緩衝區中的所有內容並退出，而不是留作下一次解析。這意味著命令注入的內容會被直接丟棄！各個裝置廠商可能都不一致請調整配置poc預設的配置並不一定可靠請做好裝置不開機的準備</string>
+    <string name="server_started">伺服器已啟動，連接埠: %d</string>
+    <string name="running">執行中</string>
+    <string name="server_error">伺服器錯誤: %s</string>
+    <string name="server_stopped">伺服器已停止</string>
+    <string name="stop_error">停止錯誤: %s</string>
+    <string name="client_connected">客戶端連線: %s</string>
+    <string name="client_said"> 說: %s</string>
+    <string name="client_disconnected"> 中斷連線</string>
+    <string name="close_error">關閉錯誤: %s</string>
+    <string name="stopped">已停止</string>
+    <string name="invalid_ip">無效IP位址</string>
+    <string name="ip_updated">IP更新為: %s</string>
+    <string name="port_range">連接埠必須為1024-65535</string>
+    <string name="port_updated">連接埠更新為: %d</string>
+    <string name="invalid_port">無效連接埠號碼</string>
+    <string name="extract_data">提取應用資料</string>
+    <string name="run_text">執行</string>
+    <string name="input_empty">輸入內容不能為空</string>
+    <string name="app_not_found">應用不存在</string>
+    <string name="ok_text">ok</string>
+    <string name="payload_injected">payload已注入</string>
+    <string name="payload_sign">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; payload</string>
+    <string name="paste_hint">直接貼上到JAVA裡 xh是跳轉後佈局的JAVA名 可以改</string>
+    <string name="config_file">唯讀設定.txt</string>
+    <string name="load_fail">載入payload失敗</string>
+    <string name="serious_warning">嚴重警告如果不執行此操作理論上你的配置可以持久化但導致的可能更多是不開機</string>
+    <string name="deploy_end">漏洞部署結束: %s</string>
+    <string name="param_not_found">未找到參數總數數字！</string>
+    <string name="anchor_not_found">未找到錨點參數: %s</string>
+    <string name="close_miui">請關閉MIUI最佳化！！！</string>
+    <string name="miui_error">MIUI_OPT: %s</string>
+
+    <!-- BootLoader -->
+    <string name="boot_title">引導載入</string>
+    <string name="initializing">初始化中...</string>
+    <string name="app_title">PoC Deployer System</string>
+    <string name="storage_permission_granted">儲存權限已獲取</string>
+    <string name="processing_shizuku">正在處理 Shizuku 權限...</string>
+    <string name="grant_shizuku_hint">\n請在 Shizuku Manager 中授權後重啟此介面。</string>
+    <string name="shizuku_check_pass">\nShizuku 權限檢查通過，開始檢測裝置可用性...</string>
+    <string name="device_vulnerable">\n檢測結果: 裝置可能存在漏洞（可利用）</string>
+    <string name="vulnerability_fixed">\n檢測結果: 漏洞已修復</string>
+    <string name="select_boot_mode">選擇啟動方式</string>
+    <string name="direct_boot_question">您希望下次啟動時直接進入 荷載控制台 嗎？</string>
+    <string name="yes_direct_boot">是下次直接進入</string>
+    <string name="boot_choice_saved">\n已儲存選擇，即將跳轉...</string>
+    <string name="no_keep_bootloader">否下次保留引導載入</string>
+    <string name="redirecting">\n即將跳轉...</string>
+    <string name="check_failed">\n檢查失敗: %s</string>
+    <string name="shizuku_granted">Shizuku 權限已授予</string>
+    <string name="shizuku_denied">Shizuku 權限被拒絕</string>
+
+    <!-- PluginAdapter -->
+    <string name="plugin_dir">POC外掛</string>
+    <string name="plugin_not_found">外掛檔案不存在</string>
+    <string name="select_op">選擇操作方式</string>
+    <string name="handle_how">你希望如何處理該外掛？</string>
+    <string name="use_shizuku">使用 Shizuku 權限執行</string>
+    <string name="shizuku_hint">需要已安裝並授權 Shizuku</string>
+    <string name="executing">執行外掛中</string>
+    <string name="missing">缺少必要檔案</string>
+    <string name="no_rish">未找到 rish 檔案，請更新擴充包以使用 Shizuku 功能</string>
+    <string name="update_ext">更新擴充包</string>
+    <string name="update_complete">現在重新進入終端模擬器以完成更新</string>
+    <string name="share_app">分享到其他應用</string>
+    <string name="downloading_plugin">下載中</string>
+    <string name="download_done">下載完成</string>
+    <string name="download_complete_msg"> 下載完成！</string>
+    <string name="cmd_end">\n命令結束, exitCode: %d</string>
+    <string name="executing_title">執行外掛中</string>
+
+    <!-- Preferences -->
+    <string name="pref_category_runtime">執行時狀態</string>
+    <string name="pref_runtime_status">目前狀態</string>
+    <string name="pref_runtime_status_summary">未執行</string>
+    <string name="pref_log_output">日誌輸出</string>
+    <string name="pref_log_output_summary">暫無日誌</string>
+
+    <string name="pref_category_network">網路配置</string>
+    <string name="pref_server_ip">伺服器IP</string>
+    <string name="pref_server_ip_dialog">設定伺服器IP</string>
+    <string name="pref_server_port">伺服器連接埠</string>
+    <string name="pref_server_port_dialog">設定伺服器連接埠</string>
+
+    <string name="pref_category_injection">注入相關</string>
+    <string name="pref_command_input">輸入注入命令</string>
+    <string name="pref_command_dialog">輸入Shell命令</string>
+    <string name="pref_uid_input">注入UID</string>
+    <string name="pref_uid_dialog">輸入合法UID</string>
+    <string name="pref_gid_input">注入GID</string>
+    <string name="pref_gid_dialog">輸入GID</string>
+    <string name="pref_group_input">注入GROUP</string>
+    <string name="pref_group_dialog">輸入GROUP</string>
+    <string name="pref_selinux_policy">SELinux策略</string>
+    <string name="pref_selinux_summary">非專業人員請勿修改大概無效</string>
+    <string name="pref_selinux_dialog">輸入策略</string>
+    <string name="pref_buffer">緩衝</string>
+    <string name="pref_buffer_dialog">輸入緩衝</string>
+    <string name="pref_padding">填充</string>
+    <string name="pref_padding_dialog">輸入填充</string>
+    <string name="pref_padding2">填充第二部分</string>
+    <string name="pref_android12_warning">警告</string>
+    <string name="pref_android12_warning_summary">你在安卓12及以上執行了此軟體 請閱讀</string>
+    <string name="pref_terminal">終端模擬器</string>
+    <string name="pref_terminal_summary">輕量版終端模擬器內建部分命令</string>
+    <string name="pref_execute_btn">執行命令</string>
+    <string name="pref_execute_summary">注入將會立即發生</string>
+
+    <string name="pref_category_server">伺服器控制</string>
+    <string name="pref_start_server">啟動服務</string>
+    <string name="pref_start_server_summary">啟動Socket監聽服務</string>
+    <string name="pref_stop_server">停止服務</string>
+    <string name="pref_stop_server_summary">停止執行中的服務</string>
+
+    <string name="pref_advanced_trigger">進階選項</string>
+    <string name="pref_advanced_trigger_summary">點擊展開/摺疊進階設定</string>
+    <string name="pref_category_advanced">進階</string>
+    <string name="pref_shell_terminal">啟動遠端終端</string>
+    <string name="pref_shell_terminal_summary">這是一個極不穩定的功能。如成功，您可以在Termux和其他終端模擬器上連接提權後的反向互動shell。開發者不保證該功能在所有裝置上有效。</string>
+    <string name="pref_extract_data">提取應用資料</string>
+    <string name="pref_extract_data_summary">透過socket將資料傳送給軟體您可以在Android/data中的poc資料中找到提取的資料\n注: 下一次提取會移除之前的提取內容</string>
+    <string name="pref_zygote_config">Zygote配置參數</string>
+    <string name="pref_zygote_config_summary">這是一個非特殊用途功能，請勿使用。該功能載入的額外參數都可能導致payload出錯，荷載器無法成功提交等。</string>
+    <string name="pref_zygote_config_dialog">選擇參數</string>
+
+    <!-- Language Settings -->
+    <string name="pref_category_language">語言設定</string>
+    <string name="pref_language">語言</string>
+    <string name="pref_language_summary">選擇應用語言</string>
+    <string name="pref_language_dialog">選擇語言</string>
+    <string name="language_system">跟隨系統</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese_simplified">簡體中文</string>
+    <string name="language_chinese_traditional">繁體中文</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_russian">俄語</string>
+    <string name="language_spanish">西班牙語</string>
+    <string name="language_french">法語</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">設定</string>
+    <string name="pref_category_other">其他</string>
+    <string name="pref_app_version">應用版本</string>
+    <string name="pref_about">關於</string>
+    <string name="pref_about_summary">檢視應用資訊</string>
+    <string name="language_changed">語言已變更，正在重新啟動應用...</string>
+
+    <!-- Menu -->
+    <string name="menu_zygote_log">Zygote日誌監聽</string>
+    <string name="menu_check_update">檢查更新</string>
+    <string name="menu_about">關於</string>
+    <string name="menu_settings">設定</string>
+
+    <!-- Agreement Activity -->
+    <string name="twrp_header_title">安全協議驗證</string>
+    <string name="twrp_risk_hint">輸入 \"I know the risk\" 以繼續</string>
+    <string name="twrp_required_text">I know the risk</string>
+    <string name="twrp_swipe_text">滑動以同意條款並進入</string>
+
+    <string name="disclaimer_title">免責聲明與警告</string>
+    <string name="disclaimer_content">本工具 (PoC-Deployer-System) 涉及進階系統修改，包括 Zygote 注入和核心操作。\n\n滑動解鎖即表示您同意：\n1. 您對裝置的任何損壞（如無限重啟、變磚、資料遺失）承擔全部責任。\n2. 開發者不對使用本軟體產生的任何後果負責。\n3. 您理解這是一個僅用於測試和教育目的的測試版本。\n\n如果您不同意，請立即解鎖此應用程式。</string>
+
+    <string name="pref_nice_name">進程別名 (Nice Name)</string>
+    <string name="pref_nice_name_dialog">輸入進程別名</string>
+    <string name="pref_runtime_flags">執行時標誌 (Runtime Flags)</string>
+    <string name="pref_runtime_flags_summary">選擇執行時標誌（例如：禁用隱藏 API 檢查）</string>
+    <string name="pref_runtime_flags_dialog">選擇標誌</string>
+
+</resources>

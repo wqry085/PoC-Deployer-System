@@ -1,13 +1,36 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <!-- Base application theme. -->
-  <style name="Base.AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+  <!-- Base application theme - 强制使用浅色主题 -->
+  <style name="Base.AppTheme" parent="Theme.Material3.Light.NoActionBar">
     <!-- Customize your theme here. -->
     <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
   </style>
 
   <style name="AppTheme" parent="Base.AppTheme" />
-    <style name="TransparentDialogTheme" parent="Theme.Material3.DayNight.Dialog.Alert">
+
+  <!-- Transparent Theme with Blur Effect -->
+  <style name="TransparentTheme" parent="Theme.Material3.Light.NoActionBar">
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:windowBackground">@android:color/transparent</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:backgroundDimEnabled">false</item>
+    <!-- Enable blur on Android 12+ -->
+    <item name="android:windowBlurBehindEnabled" tools:targetApi="s">true</item>
+    <item name="android:windowBlurBehindRadius" tools:targetApi="s">100dp</item>
+  </style>
+
+  <style name="TransparentDialogTheme" parent="Theme.Material3.DayNight.Dialog.Alert">
     <item name="android:windowIsTranslucent">true</item>
     <item name="android:windowNoTitle">true</item>
 </style>
+    <!-- TWRP Unlock Screen Theme -->
+    <style name="TwrpUnlockTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/twrp_background</item>
+        <item name="colorPrimary">@color/twrp_accent</item>
+        <item name="colorPrimaryDark">@color/twrp_background</item>
+        <item name="colorAccent">@color/twrp_accent</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/text_hint_white</item>
+    </style>
 </resources>

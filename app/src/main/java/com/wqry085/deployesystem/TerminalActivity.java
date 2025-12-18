@@ -47,14 +47,14 @@ public class TerminalActivity extends AppCompatActivity {
 
     private boolean mIsShuttingDown = false;
     private static final String ENV_FLAG_FILE = "environment_deployed.flag";
-    private static final long DEPLOYMENT_TIMEOUT_MS = 30000; // 30秒超时
+    private static final long DEPLOYMENT_TIMEOUT_MS = 30000; 
     
-    // 一次性命令执行模式相关
+    
     private boolean mIsOneTimeCommandMode = false;
     private String mOneTimeCommand = null;
     private static final String EXTRA_ONE_TIME_COMMAND = "one_time_command";
 
-    // TerminalSessionClient 和 TerminalViewClient 实现保持不变...
+    
     private final TerminalSessionClient terminalSessionClient = new TerminalSessionClient() {
         @Override public void onTextChanged(@NonNull TerminalSession changedSession) { runOnUiThread(() -> { if (terminalView != null) terminalView.onScreenUpdated(); }); }
         @Override public void onTitleChanged(@NonNull TerminalSession changedSession) { }
@@ -63,15 +63,15 @@ public class TerminalActivity extends AppCompatActivity {
             if (!mIsShuttingDown) {
                 Log.d(TAG, "Session ended unexpectedly.");
             }
-            // 如果是一次性命令模式，会话结束就关闭Activity
+            
             if (mIsOneTimeCommandMode) {
-               // finish();
+               
             }
         }
         @Override public void onCopyTextToClipboard(@NonNull TerminalSession session, String text) {
             runOnUiThread(() -> {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("终端输出", text);
+                ClipData clip = ClipData.newPlainText(getString(R.string.clipboard_label), text);
                 clipboard.setPrimaryClip(clip);
             });
         }
@@ -130,13 +130,22 @@ public class TerminalActivity extends AppCompatActivity {
     };
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LanguageHelper.attachBaseContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        
+        ThemeHelper.applyTheme(this);
+
         setContentView(R.layout.activity_terminal);
         setupWindow();
         Log.d(TAG, "TerminalActivity created");
         
-        // 检查是否是一次性命令模式
+        
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(EXTRA_ONE_TIME_COMMAND)) {
             mIsOneTimeCommandMode = true;
@@ -150,26 +159,24 @@ public class TerminalActivity extends AppCompatActivity {
         terminalView.setTextSize(28);
         setSupportActionBar(toolbar);
         
-        // 检查是否可以直接启动增强环境
+        
         if (isEnhancedEnvironmentReady()) {
             Log.d(TAG, "Enhanced environment is ready, starting directly");
             mHandler.postDelayed(this::startEnhancedSession, 500);
         } else {
-            // 否则启动引导会话
+            
             Log.d(TAG, "Enhanced environment not ready, starting bootstrap");
             mHandler.postDelayed(this::startBootstrapSession, 1000);
         }
     }
 
-    /**
-     * 检查增强环境是否就绪
-     */
+    
     private boolean isEnhancedEnvironmentReady() {
         File envDir = getExecutableDir();
         File shellFile = new File(envDir, "bin/sh");
         File busyboxFile = new File(envDir, "bin/busybox");
         
-        // 检查关键文件是否存在且可执行
+        
         boolean filesExist = shellFile.exists() && busyboxFile.exists();
         boolean filesExecutable = shellFile.canExecute() && busyboxFile.canExecute();
         
@@ -177,14 +184,12 @@ public class TerminalActivity extends AppCompatActivity {
         return filesExist && filesExecutable;
     }
 
-    /**
-     * 获取完整的系统环境变量
-     */
+    
     private Map<String, String> getSystemEnvironment() {
         Map<String, String> env = new HashMap<>();
         
         try {
-            // 执行 env 命令获取系统环境变量
+            
             Process process = Runtime.getRuntime().exec("env");
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -208,24 +213,22 @@ public class TerminalActivity extends AppCompatActivity {
         return env;
     }
 
-    /**
-     * 构建完整的环境变量数组
-     */
+    
     private String[] buildEnhancedEnvironment(String homeDir, String binPath, String shellPath) {
         Map<String, String> systemEnv = getSystemEnvironment();
         Map<String, String> enhancedEnv = new HashMap<>();
         
-        // 首先添加系统环境变量（过滤掉一些可能冲突的）
+        
         for (Map.Entry<String, String> entry : systemEnv.entrySet()) {
             String key = entry.getKey();
-            // 保留大部分系统变量，但排除一些可能冲突的
+            
             if (!key.equals("PS1") && !key.equals("HOME") && !key.equals("PATH") && 
                 !key.equals("SHELL") && !key.equals("PWD") && !key.equals("TMPDIR")) {
                 enhancedEnv.put(key, entry.getValue());
             }
         }
         
-        // 添加我们的核心环境变量（会覆盖系统中的冲突项）
+        
         enhancedEnv.put("TERM", "xterm-256color");
         enhancedEnv.put("HOME", homeDir);
         enhancedEnv.put("PATH", binPath + ":/system/bin:/system/xbin:/product/bin:/apex/com.android.runtime/bin:/apex/com.android.art/bin:/system_ext/bin:/odm/bin:/vendor/bin:/vendor/xbin");
@@ -234,14 +237,15 @@ public class TerminalActivity extends AppCompatActivity {
         enhancedEnv.put("SHELL", shellPath);
         enhancedEnv.put("LD_LIBRARY_PATH",getFilesDir().getAbsolutePath()+"/terminal_env/lib");
         enhancedEnv.put("APP_NAME","com.wqry085.deployesystem");
+        enhancedEnv.put("BINDER_APK", getApplicationInfo().sourceDir);
         enhancedEnv.put("USER", "shell");
         enhancedEnv.put("LOGNAME", "shell");
         enhancedEnv.put("HOSTNAME", Build.MODEL != null ? Build.MODEL.replace(" ", "_") : "android");
         
-        // 设置美观的PS1提示符
+        
         enhancedEnv.put("PS1", "\\[$( [ $? -eq 0 ] && echo \"\\e[1;32m\" || echo \"\\e[1;31m\" )\\]➜ \\[\\e[1;36m\\]\\W\\[\\e[0m\\] ");
         
-        // 添加Android特有的重要环境变量（如果系统中没有）
+        
         if (!enhancedEnv.containsKey("ANDROID_DATA")) enhancedEnv.put("ANDROID_DATA", "/data");
         if (!enhancedEnv.containsKey("ANDROID_ROOT")) enhancedEnv.put("ANDROID_ROOT", "/system");
         if (!enhancedEnv.containsKey("ANDROID_STORAGE")) enhancedEnv.put("ANDROID_STORAGE", "/storage");
@@ -250,7 +254,7 @@ public class TerminalActivity extends AppCompatActivity {
         if (!enhancedEnv.containsKey("ANDROID_I18N_ROOT")) enhancedEnv.put("ANDROID_I18N_ROOT", "/apex/com.android.i18n");
         if (!enhancedEnv.containsKey("ANDROID_TZDATA_ROOT")) enhancedEnv.put("ANDROID_TZDATA_ROOT", "/apex/com.android.tzdata");
         
-        // 转换回数组格式
+        
         String[] envArray = new String[enhancedEnv.size()];
         int i = 0;
         for (Map.Entry<String, String> entry : enhancedEnv.entrySet()) {
@@ -261,14 +265,12 @@ public class TerminalActivity extends AppCompatActivity {
         return envArray;
     }
 
-    /**
-     * 构建引导环境变量
-     */
+    
     private String[] buildBootstrapEnvironment(String homeDir) {
         Map<String, String> systemEnv = getSystemEnvironment();
         Map<String, String> bootstrapEnv = new HashMap<>();
         
-        // 添加系统环境变量
+        
         for (Map.Entry<String, String> entry : systemEnv.entrySet()) {
             String key = entry.getKey();
             if (!key.equals("PS1") && !key.equals("HOME") && !key.equals("PWD")) {
@@ -276,14 +278,14 @@ public class TerminalActivity extends AppCompatActivity {
             }
         }
         
-        // 设置基础环境变量
+        
         bootstrapEnv.put("TERM", "xterm-256color");
         bootstrapEnv.put("HOME", homeDir);
         bootstrapEnv.put("PWD", homeDir);
         bootstrapEnv.put("TMPDIR", getCacheDir().getAbsolutePath());
         bootstrapEnv.put("PS1", "[\\u@\\h \\W]\\$ ");
         
-        // 转换回数组格式
+        
         String[] envArray = new String[bootstrapEnv.size()];
         int i = 0;
         for (Map.Entry<String, String> entry : bootstrapEnv.entrySet()) {
@@ -293,9 +295,7 @@ public class TerminalActivity extends AppCompatActivity {
         return envArray;
     }
 
-    /**
-     * 直接启动增强会话
-     */
+    
     private void startEnhancedSession() {
         Log.d(TAG, "Starting enhanced session directly");
         
@@ -304,7 +304,7 @@ public class TerminalActivity extends AppCompatActivity {
         String binPath = new File(envDir, "bin").getAbsolutePath();
         String shellPath = binPath + "/sh";
 
-        // 使用完整的增强环境变量
+        
         String[] environment = buildEnhancedEnvironment(homeDir, binPath, shellPath);
         
         terminalSession = new TerminalSession(
@@ -317,47 +317,43 @@ public class TerminalActivity extends AppCompatActivity {
         );
         terminalView.attachSession(terminalSession);
 
-        // 如果是一次性命令模式，延迟执行命令
+        
         if (mIsOneTimeCommandMode) {
             mHandler.postDelayed(this::executeOneTimeCommand, 200);
         }
     }
 
-    /**
-     * 启动引导会话
-     */
+    
     private void startBootstrapSession() {
         Log.d(TAG, "Starting bootstrap session with /system/bin/sh...");
 
         String homeDir = getFilesDir().getAbsolutePath();
         
-        // 使用增强的引导环境变量
+        
         String[] environment = buildBootstrapEnvironment(homeDir);
 
         terminalSession = new TerminalSession("/system/bin/sh", homeDir, new String[]{"-i"}, environment, null, terminalSessionClient);
         terminalView.attachSession(terminalSession);
 
-        // 给会话更多时间初始化
+        
         mHandler.postDelayed(this::runDeploymentLogic, 1500);
     }
 
-    /**
-     * 运行部署逻辑
-     */
+    
     private void runDeploymentLogic() {
         mExecutor.execute(() -> {
             File envDir = getExecutableDir();
             File flagFile = new File(envDir, ENV_FLAG_FILE);
 
-            // 检查部署标志和完整性
+            
             if (flagFile.exists() && verifyDeployment(envDir)) {
                 Log.d(TAG, "Environment already deployed and verified.");
                 runOnUiThread(this::switchToEnhancedSession);
             } else {
                 Log.d(TAG, "Environment not deployed or verification failed. Starting deployment.");
                 runOnUiThread(() -> {
-                    executeCommand("echo '=== 正在部署终端环境 ==='");
-                    executeCommand("echo '请稍候，这可能需要一些时间...'");
+                    executeCommand("echo '" + getString(R.string.deploy_env) + "'");
+                    executeCommand("echo '" + getString(R.string.wait_msg) + "'");
                 });
 
                 boolean success = deployEnvironment(envDir);
@@ -365,15 +361,15 @@ public class TerminalActivity extends AppCompatActivity {
                 if (success && verifyDeployment(envDir)) {
                     Log.d(TAG, "Deployment successful and verified.");
                     runOnUiThread(() -> {
-                        executeCommand("echo '=== 部署完成 ==='");
+                        executeCommand("echo '" + getString(R.string.deploy_success) + "'");
                         mHandler.postDelayed(this::switchToEnhancedSession, 1000);
                     });
                 } else {
                     Log.e(TAG, "Deployment or verification failed.");
                     runOnUiThread(() -> {
-                        executeCommand("echo '=== 环境部署失败 ==='");
-                        executeCommand("echo '您当前处于基础系统模式。'");
-                        // 如果是一次性命令模式，即使在基础模式下也尝试执行命令
+                        executeCommand("echo '" + getString(R.string.deploy_fail) + "'");
+                        executeCommand("echo '" + getString(R.string.basic_mode) + "'");
+                        
                         if (mIsOneTimeCommandMode) {
                             mHandler.postDelayed(this::executeOneTimeCommand, 1000);
                         }
@@ -383,51 +379,47 @@ public class TerminalActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * 执行一次性命令
-     */
+    
     private void executeOneTimeCommand() {
         if (mOneTimeCommand != null && terminalSession != null && terminalSession.isRunning()) {
             Log.d(TAG, "Executing one-time command: " + mOneTimeCommand);
-            // 执行命令后立即退出
+            
             String fullCommand = mOneTimeCommand + "; exit\n";
             terminalSession.write(fullCommand);
         }
     }
 
-    /**
-     * 部署环境
-     */
+    
     private boolean deployEnvironment(File envDir) {
         Log.d(TAG, "Starting environment deployment to: " + envDir.getAbsolutePath());
         
         File flagFile = new File(envDir, ENV_FLAG_FILE);
         
         try {
-            // 确保目标目录存在
+            
             if (!envDir.exists() && !envDir.mkdirs()) {
                 Log.e(TAG, "Failed to create environment directory");
                 return false;
             }
 
-            // 清理旧部署（如果有）
+            
             cleanupOldDeployment(envDir);
 
-            // 从 assets 提取 ZIP
+            
             File zipFile = new File(getCacheDir(), "termarm64.zip");
             if (!extractAssetToFile("termarm64.zip", zipFile)) {
                 Log.e(TAG, "Failed to extract asset");
                 return false;
             }
 
-            // 验证 ZIP 文件
+            
             if (!verifyZipFile(zipFile)) {
                 Log.e(TAG, "ZIP file verification failed");
                 zipFile.delete();
                 return false;
             }
 
-            // 使用系统 unzip 解压
+            
             if (!executeCommandWithTimeout(new String[]{"unzip", "-o", "-q", zipFile.getAbsolutePath(), "-d", envDir.getAbsolutePath()}, 30000)) {
                 Log.e(TAG, "Unzip command failed");
                 zipFile.delete();
@@ -435,14 +427,14 @@ public class TerminalActivity extends AppCompatActivity {
             }
             zipFile.delete();
 
-            // 设置权限
+            
             File binDir = new File(envDir, "bin");
             if (!executeCommandWithTimeout(new String[]{"chmod", "-R", "755", binDir.getAbsolutePath()}, 15000)) {
                 Log.e(TAG, "Chmod command failed");
                 return false;
             }
 
-            // 运行安装脚本
+            
             File installScript = new File(envDir, "install");
             if (installScript.exists()) {
                 if (!executeCommandWithTimeout(new String[]{"sh", installScript.getAbsolutePath()}, 30000)) {
@@ -451,7 +443,7 @@ public class TerminalActivity extends AppCompatActivity {
                 }
             }
 
-            // 创建成功标志
+            
             return flagFile.createNewFile();
 
         } catch (Exception e) {
@@ -460,9 +452,7 @@ public class TerminalActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * 验证部署完整性
-     */
+    
     private boolean verifyDeployment(File envDir) {
         File[] criticalFiles = {
             new File(envDir, "bin/busybox"),
@@ -481,7 +471,7 @@ public class TerminalActivity extends AppCompatActivity {
             }
         }
         
-        // 检查 busybox 是否能正常运行
+        
         try {
             Process process = Runtime.getRuntime().exec(new String[]{
                 new File(envDir, "bin/busybox").getAbsolutePath(), "echo", "test"
@@ -500,9 +490,7 @@ public class TerminalActivity extends AppCompatActivity {
         return true;
     }
 
-    /**
-     * 切换到增强会话
-     */
+    
     private void switchToEnhancedSession() {
         Log.d(TAG, "Switching to enhanced session...");
 
@@ -511,23 +499,23 @@ public class TerminalActivity extends AppCompatActivity {
         String binPath = new File(envDir, "bin").getAbsolutePath();
         String shellPath = binPath + "/sh";
 
-        // 最终安全检查
+        
         if (!verifyDeployment(envDir)) {
             Log.e(TAG, "Enhanced environment verification failed! Staying in bootstrap.");
-            executeCommand("echo '错误：增强环境验证失败，保持基础模式'");
-            // 如果是一次性命令模式，即使在基础模式下也尝试执行命令
+            executeCommand("echo '" + getString(R.string.verify_fail) + "'");
+            
             if (mIsOneTimeCommandMode) {
                 mHandler.postDelayed(this::executeOneTimeCommand, 1000);
             }
             return;
         }
 
-        // 结束旧的引导会话
+        
         if (terminalSession != null && terminalSession.isRunning()) {
             terminalSession.finishIfRunning();
         }
 
-        // 使用完整的增强环境变量启动新的增强会话
+        
         String[] environment = buildEnhancedEnvironment(homeDir, binPath, shellPath);
         
         terminalSession = new TerminalSession(
@@ -540,28 +528,24 @@ public class TerminalActivity extends AppCompatActivity {
         );
         terminalView.attachSession(terminalSession);
 
-        // 如果是一次性命令模式，延迟执行命令
+        
         if (mIsOneTimeCommandMode) {
             mHandler.postDelayed(this::executeOneTimeCommand, 1000);
         }
     }
 
-    // --- 辅助方法 ---
+    
 
-    /**
-     * 使用更安全的目录
-     */
+    
     private File getExecutableDir() {
         return new File(getFilesDir(), "terminal_env");
     }
 
-    /**
-     * 清理旧部署
-     */
+    
     private void cleanupOldDeployment(File envDir) {
         try {
             if (envDir.exists()) {
-                // 只删除文件，保留目录结构
+                
                 File[] files = envDir.listFiles();
                 if (files != null) {
                     for (File file : files) {
@@ -592,14 +576,12 @@ public class TerminalActivity extends AppCompatActivity {
         dir.delete();
     }
 
-    /**
-     * 提取资源文件
-     */
+    
     private boolean extractAssetToFile(String assetName, File outputFile) {
         try (InputStream in = getAssets().open(assetName);
              OutputStream out = new FileOutputStream(outputFile)) {
             
-            byte[] buffer = new byte[16384]; // 更大的缓冲区
+            byte[] buffer = new byte[16384]; 
             int bytesRead;
             long totalBytes = 0;
             
@@ -607,8 +589,8 @@ public class TerminalActivity extends AppCompatActivity {
                 out.write(buffer, 0, bytesRead);
                 totalBytes += bytesRead;
                 
-                // 简单的进度日志
-                if (totalBytes % (1024 * 1024) == 0) { // 每MB日志一次
+                
+                if (totalBytes % (1024 * 1024) == 0) { 
                     Log.d(TAG, "Extracted " + (totalBytes / (1024 * 1024)) + "MB");
                 }
             }
@@ -622,16 +604,12 @@ public class TerminalActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * 验证ZIP文件
-     */
+    
     private boolean verifyZipFile(File zipFile) {
-        return zipFile.exists() && zipFile.length() > 1000; // 简单的大小检查
+        return zipFile.exists() && zipFile.length() > 1000; 
     }
 
-    /**
-     * 执行命令并处理超时
-     */
+    
     private boolean executeCommandWithTimeout(String[] command, long timeoutMs) {
         Process process = null;
         try {
@@ -639,7 +617,7 @@ public class TerminalActivity extends AppCompatActivity {
             pb.redirectErrorStream(true);
             process = pb.start();
 
-            // 读取输出用于调试
+            
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder output = new StringBuilder();
             String line;

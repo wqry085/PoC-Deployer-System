@@ -1,0 +1,69 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:key="server_control_category"
+        app:title="服务控制">
+
+        <Preference
+            app:key="start_server_button"
+            app:title="启动服务"
+            app:summary="启动 SystemService 进程"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="server_status_category"
+        app:title="服务状态">
+
+        <Preference
+            app:key="server_status"
+            app:title="服务进程状态"
+            app:summary="点击获取"/>
+
+        <Preference
+            app:key="server_version"
+            app:title="服务版本"
+            app:summary="点击获取"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="server_functions_category"
+        app:title="服务功能">
+
+        <SwitchPreferenceCompat
+            app:key="oem_unlock"
+            app:title="OEM 解锁"
+            app:summary="允许 OEM 解锁"/>
+
+        <Preference
+            app:key="stop_server"
+            app:title="停止服务"
+            app:summary="停止 SystemService 进程"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="activity_launcher_category"
+        app:title="Activity 启动器">
+
+        <EditTextPreference
+            app:key="launch_package_name"
+            app:title="包名"
+            app:summary="输入目标应用的包名"
+            app:dialogTitle="输入包名"/>
+
+        <EditTextPreference
+            app:key="launch_class_name"
+            app:title="类名"
+            app:summary="输入目标 Activity 的完整类名"
+            app:dialogTitle="输入类名"/>
+
+        <Preference
+            app:key="launch_activity_button"
+            app:title="启动 Activity"
+            app:summary="点击以发送启动指令"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

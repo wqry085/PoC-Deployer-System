@@ -1,5 +1,282 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PoC-Deployer-System</string>
+    <string name="app_icon_description">App Icon</string>
+
+    <!-- AboutActivity -->
+    <string name="about_category">About App</string>
+    <string name="cve_title">CVE-2024-31317 Exploitation Tool</string>
+    <string name="beta_desc">This is a beta version for testing and feedback collection.\nPlease report issues to: wqry085super@gmail.com</string>
+    <string name="dev_category">Developer</string>
+    <string name="dev_home">Developer\'s Coolapk Profile</string>
+    <string name="project_category">Project</string>
+     <string name="zygotelog_help">This will start a local socket listener for zygote log service, requiring Shizuku permission authorization\n\nAfter successful startup, enter nc 127.0.0.1 13568 in terminal emulator\nEnter STOP in console to end logging\nSwitch working modes via TRY_GREP/TRY_PID commands</string>
+    <!-- ZygoteActivity - Dialogs -->
+    <string name="apply">Apply</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_update_desc">No update description</string>
+    <string name="latest_version">You are already on the latest version</string>
+    <string name="check_update_failed">Update check failed: %s</string>
+    <string name="found_new_version">New version v%s available</string>
+    <string name="download_now">Download Now</string>
+    <string name="later">Later</string>
+    <string name="downloading">Downloading update v%s</string>
+    <string name="download_complete">Download complete! Install now?</string>
+    <string name="download_failed">Download failed: %s</string>
+    <string name="update_downloaded">Update v%s downloaded</string>
+    <string name="install_ask">Update package detected. Install now?</string>
+    <string name="install">Install</string>
+    <string name="start_install_error">Unable to start installation: %s</string>
+    <string name="install_later">Install Later</string>
+    <string name="download_complete_title">Download Complete</string>
+
+    <!-- TerminalActivity -->
+    <string name="clipboard_label">Terminal Output</string>
+    <string name="deploy_env">=== Deploying Terminal Environment ===</string>
+    <string name="wait_msg">Please wait, this may take a while...</string>
+    <string name="deploy_success">=== Deployment Complete ===</string>
+    <string name="deploy_fail">=== Environment Deployment Failed ===</string>
+    <string name="basic_mode">You are currently in basic system mode.</string>
+    <string name="verify_fail">Error: Enhanced environment verification failed, staying in basic mode</string>
+
+    <!-- MaterialDialogHelper -->
+    <string name="confirm">OK</string>
+    <string name="agree">Confirm</string>
+
+    <!-- ZygoteFragment -->
+    <string name="miui_restrict_warning">MIUI and PengPai shells have restricted adb\nNo permission to modify system settings and simulate clicks, Shell\'s WRITE_SECURE_SETTINGS permission has been revoked\nThis is fatal. Without WRITE_SECURE_SETTINGS permission, Shell cannot modify hidden_api_blacklist_exemptions, preventing injection from occurring\nPlease go to Settings, enable USB Security Settings in Developer Options to restore Shell rights\nFor similar devices like OPPO, please disable permission monitoring</string>
+    <string name="beta_warning_title">Warning</string>
+    <string name="beta_warning_msg">This is a non-public beta version. Many features are not implemented yet. Please be prepared for the risk of zygote disorder, zygote damage, and even device wipe. If you understand, please continue</string>
+    <string name="create_remote">Create Remote Terminal</string>
+    <string name="create_msg">Are you sure? The app will attempt to create a remote terminal using uid(%s). Please ensure previous remote terminals are terminated.</string>
+    <string name="create_done">Creation Complete</string>
+    <string name="success_hint">If successful, run nc 127.0.0.1 8080 in any terminal emulator</string>
+    <string name="warning">Warning</string>
+    <string name="android12_warn">On Android 12 and above, things get very complex. Command parsing is now done by NativeCommandBuffer. After parsing content once, it will discard all unrecognized trailing content and exit, rather than saving it for the next parse. This means injected command content will be directly discarded! Different device manufacturers may vary. Please adjust the PoC configuration. The default configuration may not be reliable. Be prepared for the device not to boot.</string>
+    <string name="server_started">Server started, port: %d</string>
+    <string name="running">Running</string>
+    <string name="server_error">Server error: %s</string>
+    <string name="server_stopped">Server stopped</string>
+    <string name="stop_error">Stop error: %s</string>
+    <string name="client_connected">Client connected: %s</string>
+    <string name="client_said"> said: %s</string>
+    <string name="client_disconnected"> disconnected</string>
+    <string name="close_error">Close error: %s</string>
+    <string name="stopped">Stopped</string>
+    <string name="invalid_ip">Invalid IP address</string>
+    <string name="ip_updated">IP updated to: %s</string>
+    <string name="port_range">Port must be between 1024-65535</string>
+    <string name="port_updated">Port updated to: %d</string>
+    <string name="invalid_port">Invalid port number</string>
+    <string name="extract_data">Extract App Data</string>
+    <string name="run_text">Run</string>
+    <string name="input_empty">Input cannot be empty</string>
+    <string name="app_not_found">App not found</string>
+    <string name="ok_text">OK</string>
+    <string name="payload_injected">Payload injected</string>
+    <string name="payload_sign">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; payload</string>
+    <string name="paste_hint">Paste directly into JAVA. xh is the JAVA name of the layout after jumping. You can change it</string>
+    <string name="config_file">ReadOnly_Config.txt</string>
+    <string name="load_fail">Failed to load payload</string>
+    <string name="serious_warning">Serious warning: If you do not perform this operation, theoretically your configuration can be persistent, but what may result more is failure to boot</string>
+    <string name="deploy_end">Exploit deployment ended: %s</string>
+    <string name="param_not_found">Parameter count number not found!</string>
+    <string name="anchor_not_found">Anchor parameter not found: %s</string>
+    <string name="close_miui">Please disable MIUI optimization!!!</string>
+    <string name="miui_error">MIUI_OPT: %s</string>
+
+    <!-- BootLoader -->
+    <string name="boot_title">Boot Loader</string>
+    <string name="initializing">Initializing...</string>
+    <string name="app_title">PoC Deployer System</string>
+    <string name="storage_permission_granted">Storage permission granted</string>
+    <string name="processing_shizuku">Processing Shizuku permission...</string>
+    <string name="grant_shizuku_hint">\nPlease grant permission in Shizuku Manager and restart this interface.</string>
+    <string name="shizuku_check_pass">\nShizuku permission check passed, starting device availability detection...</string>
+    <string name="device_vulnerable">\nDetection result: Device may have vulnerability (exploitable)</string>
+    <string name="vulnerability_fixed">\nDetection result: Vulnerability has been fixed</string>
+    <string name="select_boot_mode">Select Boot Mode</string>
+    <string name="direct_boot_question">Do you want to directly enter the Payload Console next time?</string>
+    <string name="yes_direct_boot">Yes, enter directly next time</string>
+    <string name="boot_choice_saved">\nChoice saved, redirecting...</string>
+    <string name="no_keep_bootloader">No, keep Boot Loader next time</string>
+    <string name="redirecting">\nRedirecting...</string>
+    <string name="check_failed">\nCheck failed: %s</string>
+    <string name="shizuku_granted">Shizuku permission granted</string>
+    <string name="shizuku_denied">Shizuku permission denied</string>
+
+    <!-- PluginAdapter -->
+    <string name="plugin_dir">PoC Plugins</string>
+    <string name="plugin_not_found">Plugin file not found</string>
+    <string name="select_op">Select Operation</string>
+    <string name="handle_how">How would you like to handle this plugin?</string>
+    <string name="use_shizuku">Execute with Shizuku permission</string>
+    <string name="shizuku_hint">Requires Shizuku to be installed and authorized</string>
+    <string name="executing">Executing plugin</string>
+    <string name="missing">Missing required files</string>
+    <string name="no_rish">rish file not found. Please update extension package to use Shizuku features</string>
+    <string name="update_ext">Update Extension Package</string>
+    <string name="update_complete">Now re-enter terminal emulator to complete the update</string>
+    <string name="share_app">Share to other apps</string>
+    <string name="downloading_plugin">Downloading</string>
+    <string name="download_done">Download Complete</string>
+    <string name="download_complete_msg"> Download complete!</string>
+    <string name="cmd_end">\nCommand ended, exitCode: %d</string>
+    <string name="executing_title">Executing Plugin</string>
+
+    <!-- Preferences -->
+    <string name="pref_category_runtime">Runtime Status</string>
+    <string name="pref_runtime_status">Current Status</string>
+    <string name="pref_runtime_status_summary">Not running</string>
+    <string name="pref_log_output">Log Output</string>
+    <string name="pref_log_output_summary">No logs</string>
+
+    <string name="pref_category_network">Network Configuration</string>
+    <string name="pref_server_ip">Server IP</string>
+    <string name="pref_server_ip_dialog">Set Server IP</string>
+    <string name="pref_server_port">Server Port</string>
+    <string name="pref_server_port_dialog">Set Server Port</string>
+
+    <string name="pref_category_injection">Injection Related</string>
+    <string name="pref_command_input">Input Injection Command</string>
+    <string name="pref_command_dialog">Input Shell Command</string>
+    <string name="pref_uid_input">Injection UID</string>
+    <string name="pref_uid_dialog">Input Valid UID</string>
+    <string name="pref_gid_input">Injection GID</string>
+    <string name="pref_gid_dialog">Input GID</string>
+    <string name="pref_group_input">Injection GROUP</string>
+    <string name="pref_group_dialog">Input GROUP</string>
+    <string name="pref_selinux_policy">SELinux Policy</string>
+    <string name="pref_selinux_summary">Non-professionals please do not modify, may be ineffective</string>
+    <string name="pref_selinux_dialog">Input Policy</string>
+    <string name="pref_nice_name">Process Nice Name</string>
+    <string name="pref_nice_name_dialog">Input Nice Name</string>
+    <string name="pref_runtime_flags">Runtime Flags</string>
+    <string name="pref_runtime_flags_summary">Select runtime flags (e.g., Disable Hidden API Checks)</string>
+    <string name="pref_runtime_flags_dialog">Select Flags</string>
+    <string name="pref_buffer">Buffer</string>
+    <string name="pref_buffer_dialog">Input Buffer</string>
+    <string name="pref_padding">Padding</string>
+    <string name="pref_padding_dialog">Input Padding</string>
+    <string name="pref_padding2">Padding Part 2</string>
+    <string name="pref_android12_warning">Warning</string>
+    <string name="pref_android12_warning_summary">You are running this software on Android 12 and above, please read</string>
+    <string name="pref_terminal">Terminal Emulator</string>
+    <string name="pref_terminal_summary">Lightweight terminal emulator with built-in commands</string>
+    <string name="pref_execute_btn">Execute Command</string>
+    <string name="pref_execute_summary">Injection will occur immediately</string>
+
+    <string name="pref_category_server">Server Control</string>
+    <string name="pref_start_server">Start Service</string>
+    <string name="pref_start_server_summary">Start Socket listening service</string>
+    <string name="pref_stop_server">Stop Service</string>
+    <string name="pref_stop_server_summary">Stop running service</string>
+
+    <string name="pref_advanced_trigger">Advanced Options</string>
+    <string name="pref_advanced_trigger_summary">Click to expand/collapse advanced settings</string>
+    <string name="pref_category_advanced">Advanced</string>
+    <string name="pref_shell_terminal">Start Remote Terminal</string>
+    <string name="pref_shell_terminal_summary">This is an extremely unstable feature. If successful, you can connect to a privileged reverse interactive shell in Termux and other terminal emulators. The developer does not guarantee this feature will work on all devices.</string>
+    <string name="pref_extract_data">Extract App Data</string>
+    <string name="pref_extract_data_summary">Send data to the app via socket. You can find the extracted data in the PoC data folder in Android/data\nNote: The next extraction will remove previous extraction content</string>
+    <string name="pref_zygote_config">Zygote Configuration Parameters</string>
+    <string name="pref_zygote_config_summary">This is a non-special purpose feature, please do not use. All additional parameters loaded by this feature may cause payload errors, loader submission failures, etc.</string>
+    <string name="pref_zygote_config_dialog">Select Parameters</string>
+
+    <!-- Language Settings -->
+    <string name="pref_category_language">Language Settings</string>
+    <string name="pref_language">Language</string>
+    <string name="pref_language_summary">Select app language</string>
+    <string name="pref_language_dialog">Select Language</string>
+    <string name="language_system">Follow System</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese_simplified">Simplified Chinese</string>
+    <string name="language_chinese_traditional">Traditional Chinese</string>
+    <string name="language_japanese">Japanese</string>
+    <string name="language_russian">Russian</string>
+    <string name="language_spanish">Spanish</string>
+    <string name="language_french">French</string>
+
+    <!-- Theme Settings -->
+    <string name="pref_category_appearance">Appearance</string>
+    <string name="pref_theme">Theme Style</string>
+    <string name="pref_theme_summary">Choose your preferred theme</string>
+    <string name="pref_theme_dialog">Select Theme</string>
+    <string name="theme_default">Default</string>
+    <string name="theme_transparent">Transparent (Blur Effect)</string>
+    <string name="theme_changed">Theme changed, restarting app...</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Settings</string>
+    <string name="pref_category_other">Other</string>
+    <string name="pref_app_version">App Version</string>
+    <string name="pref_app_selector">Application Selector</string>
+    <string name="pref_app_selector_summary">Select the application to be injected through the application list</string>
+    <string name="pref_about">About</string>
+    <string name="pref_about_summary">View app information</string>
+    <string name="language_changed">Language changed, restarting app...</string>
+
+    <!-- App Selector Bottom Sheet -->
+    <string name="select_app">Select Application</string>
+    <string name="search_app">Search applications...</string>
+    <string name="app_icon">Application Icon</string>
+    <string name="selected_app">Selected application</string>
+    <string name="loading_apps">Loading applications...</string>
+    <string name="no_apps_found">No applications found</string>
+
+    <!-- Menu -->
+    <string name="menu_zygote_log">Zygote Log Listener</string>
+    <string name="menu_check_update">Check for Updates</string>
+    <string name="menu_about">About</string>
+    <string name="menu_settings">Settings</string>
+
+    <!-- AppDetailActivity -->
+    <string name="app_not_found_toast">App not found</string>
+    <string name="app_authorized">Authorized</string>
+    <string name="app_unauthorized">Unauthorized</string>
+    <string name="app_status_toast">App %s</string>
+
+    <!-- runpayload.java -->
+    <string name="runpayload_cant_create_temp_file">Unable to create temporary file</string>
+    <string name="runpayload_no_file_or_text">No file or text received</string>
+    <string name="runpayload_confirm_load_third_party">Are you sure you want to load a third-party payload?</string>
+    <string name="runpayload_payload_path_source">Payload path source:</string>
+    <string name="runpayload_run_payload">Run Payload</string>
+    <string name="runpayload_cancel">Cancel</string>
+    <string name="runpayload_cant_open_file">Unable to open file</string>
+    <string name="runpayload_read_failed">Read failed:</string>
+    <string name="runpayload_process_failed">Process failed:</string>
+    <string name="runpayload_payload_loaded_successfully">Payload loaded successfully</string>
+    <string name="runpayload_payload_load_failed">Payload load failed</string>
+    <string name="runpayload_vulnerability_deployment_ended">Vulnerability deployment ended:</string>
+   <string name="zygote_activity_tab_payload">payload</string>
+    <string name="zygote_activity_tab_log">Zygote Log</string>
+    <string name="zygote_activity_tab_auth">Authorization</string>
+
+    <!-- FolderReceiver.java -->
+    <string name="folder_receiver_service_running">Receiving service is already running</string>
+    <string name="folder_receiver_waiting_for_connection">Waiting for client to connect to port %d...</string>
+    <string name="folder_receiver_server_start_failed">Server startup failed: %s</string>
+    <string name="folder_receiver_starting_file_receive">Starting to receive files...</string>
+    <string name="folder_receiver_receiving_file_progress">Receiving file: %s (%s)\nProgress: %d/%d</string>
+    <string name="folder_receiver_creating_directory">Creating directory: %s</string>
+    <string name="folder_receiver_receive_complete">File reception complete, %d files received in total</string>
+    <string name="folder_receiver_ready_for_next">Ready for next transmission...</string>
+    <string name="folder_receiver_receive_error">File receiving error: %s</string>
+    <string name="folder_receiver_progress_dialog_title">App Data Receiving</string>
+
+    <!-- ZygoteFragment.java -->
+    <string name="zygote_fragment_no_logs">No logs</string>
+    <string name="zygote_fragment_poc_exit">poc exit:</string>
+    <string name="zygote_fragment_selected_app">Selected app</string>
+
+    <!-- Agreement Activity -->
+    <string name="twrp_header_title">Security Verification</string>
+    <string name="twrp_risk_hint">Type \'I know the risk\' to proceed</string>
+    <string name="twrp_required_text">I know the risk</string>
+    <string name="twrp_swipe_text">Swipe to Accept and Enter</string>
+
+    <string name="disclaimer_title">DISCLAIMER &amp; WARNING</string>
+    <string name="disclaimer_content">This tool (PoC-Deployer-System) involves advanced system modifications, including Zygote injection and kernel manipulation.\n\nBy swiping to unlock, you agree that:\n1. You accept full responsibility for any damage to your device (bootloops, bricking, data loss).\n2. The developer is NOT liable for any consequences of using this software.\n3. You understand this is a BETA build intended for testing and educational purposes only.\n\nIf you do not agree, please uninstall this application immediately.</string>
 
 </resources>
