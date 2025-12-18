@@ -965,20 +965,17 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
 
         
         handler.postDelayed(() -> {
-            Context ctx = getActivity();
-            if (ctx == null) return;
+    ContentValues resetValues = new ContentValues();
+    resetValues.put(Settings.Global.NAME, "hidden_api_blacklist_exemptions");
+    resetValues.put(Settings.Global.VALUE, "null");
 
-            ContentValues resetValues = new ContentValues();
-            resetValues.put(Settings.Global.NAME, "hidden_api_blacklist_exemptions");
-            resetValues.put(Settings.Global.VALUE, "null");
-
-            try {
-                ctx.getContentResolver().insert(
-                    Uri.parse("content://settings/global"), values);
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to reset settings", e);
-            }
-        }, 200);
+    try {
+        context.getContentResolver().insert(
+            Uri.parse("content://settings/global"), resetValues);  // ✅ 改成 resetValues
+    } catch (Exception e) {
+        Log.e(TAG, "Failed to reset settings", e);
+    }
+}, 200);
     }
 
     
