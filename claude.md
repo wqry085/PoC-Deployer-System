@@ -277,11 +277,16 @@ adb logcat -s FolderReceiver:* SocketSender:*
 
 ---
 
-## 开发使用工具
-- gemini-2.5/3-pro
-- claude-opus-4-5
-- claude-3.5-sonnet
-- deepseek-v3.1
+## 开发工具
+
+本项目开发过程中使用了以下 AI 辅助工具：
+
+| 工具 | 用途 |
+|------|------|
+| Gemini 2.5/3 Pro | 代码优化 |
+| Claude Opus 4.5 | 代码重构 |
+| Claude 3.5 Sonnet | 代码审查 |
+| DeepSeek V3.1 | 代码辅助 |
 
 ---
 
