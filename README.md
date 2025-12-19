@@ -6,6 +6,8 @@
 
 [English](./README_EN.md) | 中文
 
+[Binder-CLI](./binder.md) 假如你玩腻了system权限的命令行 您可以尝试部署它来使用binder访问系统服务
+
 一个基于 CVE-2024-31317 的 Android Zygote 注入工具，集成远程 Shell、文件传输、策略管理等功能。
 
 ## 项目声明
