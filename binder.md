@@ -6,8 +6,6 @@
 
 **A powerful command-line tool for interacting with Android Binder services**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Commands](#-commands) • [Examples](#-examples)
-
 </div>
 
 ---
@@ -27,14 +25,6 @@ Binder CLI is a comprehensive command-line utility for Android that allows devel
 - 📤 **Interface Export** - Export interface definitions (Java/Kotlin/JSON)
 - 💻 **Interactive Shell** - Built-in REPL for interactive exploration
 - 🎨 **Multiple Output Formats** - Support for JSON, raw, and formatted output
-
-## 📥 Installation
-
-### Prerequisites
-
-- Android device with ADB access
-- Root access recommended (for full functionality)
-- Java 8+ development environment (for building)
 
 ### Run
 
