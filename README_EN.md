@@ -8,6 +8,8 @@
 
 An Android Zygote injection tool based on CVE-2024-31317, featuring remote shell, file transfer, and policy management capabilities.
 
+[Binder-CLI](./binder.md) If you are tired of the command line with system permissions, you can try deploying it to use binders to access system services
+
 ## Project Statement
 
 ### Acknowledgements
