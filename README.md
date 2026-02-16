@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Android](https://img.shields.io/badge/Android-9~13-green.svg)](https://developer.android.com)
 
+[English](./README_EN.md) | 中文
+
 基于 CVE-2024-31317 的 Zygote 注入工具制作的可视化工具，集成远程终端和文件传输。
 
 [Binder-CLI](./binder.md) - 通过 binder 访问系统服务
