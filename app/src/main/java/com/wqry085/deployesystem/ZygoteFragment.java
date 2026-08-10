@@ -371,6 +371,8 @@ public class ZygoteFragment extends PreferenceFragmentCompat
     }
 
     private void runShizuku() {
+        String kill_command = "pkill -f shizuku_server";
+        ShizukuExec(kill_command);
         String command = getPreferenceText(libShizukuPath);
 
         if (!validateInputs()) {
@@ -378,6 +380,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         }
 
         String payload = buildExecutePayload(command);
+
         if (payload != null) {
             runPayload(payload);
             showSnackbar(getString(R.string.payload_sign));
