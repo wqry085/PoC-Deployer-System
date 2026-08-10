@@ -59,7 +59,7 @@ public class RunPayload extends Activity {
     // Settings
     private static final String SETTINGS_KEY = "hidden_api_blacklist_exemptions";
     private static final String SETTINGS_URI = "content://settings/global";
-    private static final String CONFIG_FILE_PATH = "/data/local/tmp/read_only_config.txt";
+    private static final String CONFIG_FILE_PATH = "/data/local/tmp/ReadOnly_Config.txt";
     private static final int RESET_DELAY_MS = 200;
 
     // State
