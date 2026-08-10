@@ -15,13 +15,13 @@ else ()
 
     add_definitions(-DDEBUG)
 endif ()
-include_directories(${OPENSSL_INCLUDE_DIRS})
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/openssl/include")
 
-find_library(OPENSSL_LIB crypto)
+set(OPENSSL_LIB "${CMAKE_CURRENT_SOURCE_DIR}/openssl/${ANDROID_ABI}/libcrypto.so")
 
 add_executable(libzygote_nc.so
         zygote_nc.c)
-        
+
 target_link_libraries(libzygote_nc.so log ${OPENSSL_LIB})
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -31,7 +31,7 @@ endif ()
 
 add_executable(libzygote_term.so
         zygote_term.c app_process_launcher.c socket_sender.c policy_client.c)
-        
+
 target_link_libraries(libzygote_term.so log ${OPENSSL_LIB})
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -41,7 +41,7 @@ endif ()
 
 add_executable(libbinder.so
         binder.c)
-        
+
 target_link_libraries(libbinder.so log ${OPENSSL_LIB})
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -51,7 +51,7 @@ endif ()
 
 add_executable(libpolicy_daemon.so
         policy_daemon.c)
-        
+
 target_link_libraries(libpolicy_daemon.so log ${OPENSSL_LIB})
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")

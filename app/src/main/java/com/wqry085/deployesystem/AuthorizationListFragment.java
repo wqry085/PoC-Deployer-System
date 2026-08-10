@@ -104,7 +104,7 @@ public class AuthorizationListFragment extends Fragment {
      */
     private void checkDaemonStatus() {
         if (daemonStatusText != null) {
-            daemonStatusText.setText("检查守护进程状态...");
+            daemonStatusText.setText(getString(R.string.checking_daemon_status));
             daemonStatusText.setVisibility(View.VISIBLE);
         }
 
@@ -120,16 +120,16 @@ public class AuthorizationListFragment extends Fragment {
                 loadApps();
             } else {
                 if (daemonStatusText != null) {
-                    daemonStatusText.setText("⚠️ 策略守护进程未运行");
+                    daemonStatusText.setText(getString(R.string.daemon_not_running));
                     daemonStatusText.setVisibility(View.VISIBLE);
                 }
                 enableWhitelistSwitch.setEnabled(false);
                 progressBar.setVisibility(View.GONE);
-                
-                Toast.makeText(getContext(), 
-                    "策略守护进程未运行，请先启动服务", 
+
+                Toast.makeText(getContext(),
+                    R.string.error_daemon_not_running,
                     Toast.LENGTH_LONG).show();
-            }
+                }
         });
     }
 
@@ -139,7 +139,7 @@ public class AuthorizationListFragment extends Fragment {
     private void loadWhitelistState() {
         PolicyClient.isEnabledAsync(enabled -> {
             if (!isAdded()) return;
-            
+
             enableWhitelistSwitch.setOnCheckedChangeListener(null);
             enableWhitelistSwitch.setChecked(enabled);
             enableWhitelistSwitch.setEnabled(true);
@@ -157,13 +157,12 @@ public class AuthorizationListFragment extends Fragment {
 
         PolicyClient.BooleanCallback callback = success -> {
             if (!isAdded()) return;
-            
+
             enableWhitelistSwitch.setEnabled(true);
-            
+
             if (success) {
-                Toast.makeText(getContext(),
-                    enabled ? "白名单已启用" : "白名单已禁用",
-                    Toast.LENGTH_SHORT).show();
+                String message = enabled ? getString(R.string.whitelist_enabled) : getString(R.string.whitelist_disabled);
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
             } else {
                 // 恢复开关状态
                 enableWhitelistSwitch.setOnCheckedChangeListener(null);
@@ -171,8 +170,8 @@ public class AuthorizationListFragment extends Fragment {
                 enableWhitelistSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     setWhitelistEnabled(isChecked);
                 });
-                
-                Toast.makeText(getContext(), "操作失败", Toast.LENGTH_SHORT).show();
+
+                Toast.makeText(getContext(), R.string.operation_failed, Toast.LENGTH_SHORT).show();
             }
         };
 
@@ -193,21 +192,21 @@ public class AuthorizationListFragment extends Fragment {
         executor.execute(() -> {
             // 获取白名单
             Set<Integer> whitelistedUids = PolicyClient.getWhitelistedUids();
-            
+
             // 获取应用列表
             List<AppInfo> newAppList = new ArrayList<>();
-            
+
             if (getContext() == null) return;
-            
+
             PackageManager pm = getContext().getPackageManager();
             List<PackageInfo> packages = pm.getInstalledPackages(0);
 
             boolean showSystem = showSystemAppsSwitch.isChecked();
 
             for (PackageInfo packageInfo : packages) {
-                boolean isSystemApp = (packageInfo.applicationInfo.flags 
+                boolean isSystemApp = (packageInfo.applicationInfo.flags
                     & ApplicationInfo.FLAG_SYSTEM) != 0;
-                
+
                 if (!showSystem && isSystemApp) {
                     continue;
                 }
@@ -227,7 +226,7 @@ public class AuthorizationListFragment extends Fragment {
 
             handler.post(() -> {
                 if (!isAdded()) return;
-                
+
                 fullAppList = newAppList;
                 filter(searchView.getQuery().toString());
                 progressBar.setVisibility(View.GONE);
@@ -242,7 +241,7 @@ public class AuthorizationListFragment extends Fragment {
     private void filter(String text) {
         List<AppInfo> filteredList = new ArrayList<>();
         String lowerText = text.toLowerCase();
-        
+
         for (AppInfo item : fullAppList) {
             if (item.getName().toLowerCase().contains(lowerText) ||
                 item.getPackageName().toLowerCase().contains(lowerText)) {
@@ -303,9 +302,9 @@ public class AuthorizationListFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             AppInfo app = appList.get(position);
-            
+
             holder.appName.setText(app.getName());
-            holder.appPackage.setText(String.format("%s (UID: %d)", 
+            holder.appPackage.setText(String.format("%s \n(UID: %d)",
                 app.getPackageName(), app.getUid()));
             holder.appIcon.setImageDrawable(app.getIcon());
 
@@ -315,10 +314,10 @@ public class AuthorizationListFragment extends Fragment {
 
             holder.authorizeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 holder.authorizeSwitch.setEnabled(false);
-                
+
                 PolicyClient.BooleanCallback callback = success -> {
                     holder.authorizeSwitch.setEnabled(true);
-                    
+
                     if (success) {
                         app.setAuthorized(isChecked);
                         // 保存更改
@@ -329,8 +328,8 @@ public class AuthorizationListFragment extends Fragment {
                         holder.authorizeSwitch.setChecked(!isChecked);
                         holder.authorizeSwitch.setOnCheckedChangeListener(
                             (btn, checked) -> onBindViewHolder(holder, position));
-                        
-                        Toast.makeText(getContext(), "操作失败", Toast.LENGTH_SHORT).show();
+
+                        Toast.makeText(getContext(), R.string.operation_failed, Toast.LENGTH_SHORT).show();
                     }
                 };
 

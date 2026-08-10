@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
 public class Binder {
     private static final String TAG = "BinderCLI";
     private static final String VERSION = "2.0.0";
-    
+
     private static Map<String, String> serviceStubMap = new HashMap<>();
-    
+
     private static Map<String, Class<?>> typeAliases = new HashMap<>();
-    
+
     private static Map<String, Object> constantsMap = new HashMap<>();
-    
+
     static {
         serviceStubMap.put("activity", "android.app.IActivityManager$Stub");
         serviceStubMap.put("package", "android.content.pm.IPackageManager$Stub");
@@ -138,9 +138,6 @@ public class Binder {
                 case "export":
                     handleExportCommand(getExtraArgs(args, 1));
                     break;
-                case "--wqry085":
-                    handleEasterEgg();
-                    break;
                 case "version":
                 case "-v":
                 case "--version":
@@ -170,13 +167,13 @@ public class Binder {
     }
 
     // ==================== 命令处理 ====================
-    
+
     private static void handleListCommand(String[] args) throws Exception {
         boolean showAll = false;
         boolean showDead = false;
         boolean compact = false;
         String filter = null;
-        
+
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "-a":
@@ -199,10 +196,10 @@ public class Binder {
                     break;
             }
         }
-        
+
         listServices(showAll, showDead, compact, filter);
     }
-    
+
     private static void handleCallCommand(String[] args) throws Exception {
         if (args.length < 2) {
             System.err.println("Usage: binder call <service> <method> [options] [args...]");
@@ -213,7 +210,7 @@ public class Binder {
             System.err.println("  -r, --raw              Output raw result");
             return;
         }
-        
+
         String serviceName = args[0];
         String methodName = args[1];
         String[] types = null;
@@ -221,7 +218,7 @@ public class Binder {
         boolean jsonOutput = false;
         boolean rawOutput = false;
         List<String> methodArgs = new ArrayList<>();
-        
+
         for (int i = 2; i < args.length; i++) {
             switch (args[i]) {
                 case "-t":
@@ -248,11 +245,11 @@ public class Binder {
                     methodArgs.add(args[i]);
             }
         }
-        
-        callService(serviceName, methodName, methodArgs.toArray(new String[0]), 
+
+        callService(serviceName, methodName, methodArgs.toArray(new String[0]),
                    types, userId, jsonOutput, rawOutput);
     }
-    
+
     private static void handleMethodsCommand(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: binder methods <service> [options]");
@@ -263,13 +260,13 @@ public class Binder {
             System.err.println("  -s, --signature         Show full method signatures");
             return;
         }
-        
+
         String serviceName = args[0];
         String filter = null;
         boolean showParams = false;
         boolean showReturn = false;
         boolean showSignature = false;
-        
+
         for (int i = 1; i < args.length; i++) {
             switch (args[i]) {
                 case "-f":
@@ -292,10 +289,10 @@ public class Binder {
                     break;
             }
         }
-        
+
         listServiceMethods(serviceName, filter, showParams, showReturn, showSignature);
     }
-    
+
     private static void handleInfoCommand(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: binder info <service> [options]");
@@ -304,13 +301,13 @@ public class Binder {
             System.err.println("  -j, --json       Output as JSON");
             return;
         }
-        
+
         boolean verbose = hasFlag(args, "-v", "--verbose");
         boolean json = hasFlag(args, "-j", "--json");
-        
+
         getServiceInfo(args[0], verbose, json);
     }
-    
+
     private static void handlePingCommand(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: binder ping <service> [options]");
@@ -319,14 +316,14 @@ public class Binder {
             System.err.println("  -i, --interval <ms>  Interval between pings");
             return;
         }
-        
+
         String serviceName = args[0];
         int count = getIntFlag(args, "-c", "--count", 1);
         int interval = getIntFlag(args, "-i", "--interval", 1000);
-        
+
         pingService(serviceName, count, interval);
     }
-    
+
     private static void handleDumpCommand(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: binder dump <service> [dump-args...]");
@@ -334,35 +331,35 @@ public class Binder {
         }
         dumpService(args[0], getExtraArgs(args, 1));
     }
-    
+
     private static void handleMonitorCommand(String[] args) throws Exception {
         System.out.println("Monitoring Binder services...");
         System.out.println("Press Ctrl+C to stop");
         System.out.println("==========================================");
-        
+
         Set<String> previousServices = new HashSet<>();
-        
+
         while (true) {
             try {
                 Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
                 Method listServicesMethod = serviceManagerClass.getDeclaredMethod("listServices");
                 String[] services = (String[]) listServicesMethod.invoke(null);
                 Set<String> currentServices = new HashSet<>(Arrays.asList(services));
-                
+
                 // 检查新增服务
                 for (String service : currentServices) {
                     if (!previousServices.isEmpty() && !previousServices.contains(service)) {
                         System.out.println("[+] New service: " + service);
                     }
                 }
-                
+
                 // 检查移除服务
                 for (String service : previousServices) {
                     if (!currentServices.contains(service)) {
                         System.out.println("[-] Removed service: " + service);
                     }
                 }
-                
+
                 previousServices = currentServices;
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -370,7 +367,7 @@ public class Binder {
             }
         }
     }
-    
+
     private static void handleTransactionCommand(String[] args) throws Exception {
         if (args.length < 3) {
             System.err.println("Usage: binder transact <service> <code> <data>");
@@ -378,14 +375,14 @@ public class Binder {
             System.err.println("  data: Hex-encoded data or 'empty' for empty parcel");
             return;
         }
-        
+
         String serviceName = args[0];
         int code = parseIntArg(args[1]);
         String data = args[2];
-        
+
         sendRawTransaction(serviceName, code, data);
     }
-    
+
     private static void handleSearchCommand(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: binder search <pattern> [options]");
@@ -394,30 +391,30 @@ public class Binder {
             System.err.println("  -i, --interface  Search in interface names");
             return;
         }
-        
+
         String pattern = args[0];
         boolean searchMethods = hasFlag(args, "-m", "--methods");
         boolean searchInterface = hasFlag(args, "-i", "--interface");
-        
+
         if (!searchMethods && !searchInterface) {
             searchMethods = true;
             searchInterface = true;
         }
-        
+
         searchServices(pattern, searchMethods, searchInterface);
     }
-    
+
     private static void handleInterfaceCommand(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: binder interface <interface-name>");
             System.err.println("Example: binder interface android.app.IActivityManager");
             return;
         }
-        
+
         String interfaceName = args[0];
         inspectInterface(interfaceName);
     }
-    
+
     private static void handleConstantsCommand(String[] args) throws Exception {
         if (args.length < 1) {
             // 显示所有已知常量
@@ -428,23 +425,23 @@ public class Binder {
             }
             return;
         }
-        
+
         // 从类中提取常量
         String className = args[0];
         extractConstants(className);
     }
-    
+
     private static void handleBatchCommand(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: binder batch <command-file>");
             System.err.println("  Execute multiple commands from a file");
             return;
         }
-        
+
         System.err.println("Batch execution from file: " + args[0]);
         System.err.println("(File reading not implemented in this example)");
     }
-    
+
     private static void handleExportCommand(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("Usage: binder export <service> [options]");
@@ -453,74 +450,65 @@ public class Binder {
             System.err.println("  -o, --output <file>    Output file");
             return;
         }
-        
+
         String serviceName = args[0];
         String format = getStringFlag(args, "-f", "--format", "java");
-        
+
         exportServiceInterface(serviceName, format);
-    }
-    
-    private static void handleEasterEgg() {
-        System.out.println("ok >>>>");
-        try {
-            Runtime.getRuntime().exec("/system/bin/am start -a android.intent.action.VIEW -d \"https://b23.tv/c1tB6G9\"");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     // ==================== 核心功能实现 ====================
-    
-    private static void listServices(boolean showAll, boolean showDead, 
+
+    private static void listServices(boolean showAll, boolean showDead,
                                     boolean compact, String filter) throws Exception {
         Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
         Method listServicesMethod = serviceManagerClass.getDeclaredMethod("listServices");
         String[] services = (String[]) listServicesMethod.invoke(null);
-        
+
         Arrays.sort(services);
-        
-        Pattern filterPattern = filter != null ? 
+
+        Pattern filterPattern = filter != null ?
             Pattern.compile(filter, Pattern.CASE_INSENSITIVE) : null;
-        
+
         int aliveCount = 0;
         int deadCount = 0;
         int shownCount = 0;
-        
+
         if (!compact) {
             System.out.println("Available Binder Services:");
             System.out.println("==========================================");
         }
-        
+
         for (String service : services) {
             if (filterPattern != null && !filterPattern.matcher(service).find()) {
                 continue;
             }
-            
+
             try {
                 Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
                 Object binder = getServiceMethod.invoke(null, service);
-                
+
                 if (binder != null) {
                     Method pingBinderMethod = binder.getClass().getMethod("pingBinder");
                     boolean isAlive = (Boolean) pingBinderMethod.invoke(binder);
-                    
+
                     if (isAlive) {
                         aliveCount++;
                     } else {
                         deadCount++;
                     }
-                    
+
                     if (showDead && isAlive) continue;
                     if (!showAll && !isAlive) continue;
-                    
+
                     shownCount++;
-                    
+
                     if (compact) {
                         System.out.println(service);
                     } else {
                         String status = isAlive ? "✓" : "✗";
                         String descriptor = getServiceDescriptor(binder);
-                        System.out.printf("%s %-35s %s%n", status, service, 
+                        System.out.printf("%s %-35s %s%n", status, service,
                                          shortenDescriptor(descriptor));
                     }
                 } else {
@@ -541,7 +529,7 @@ public class Binder {
                 }
             }
         }
-        
+
         if (!compact) {
             System.out.println("==========================================");
             System.out.printf("Shown: %d | Alive: %d | Dead: %d | Total: %d%n",
@@ -553,41 +541,41 @@ public class Binder {
                                           boolean showParams, boolean showReturn,
                                           boolean showSignature) throws Exception {
         Object service = getServiceProxy(serviceName);
-        
+
         System.out.println("Methods for service: " + serviceName);
         System.out.println("==========================================");
-        
-        Pattern filterPattern = filter != null ? 
+
+        Pattern filterPattern = filter != null ?
             Pattern.compile(filter, Pattern.CASE_INSENSITIVE) : null;
-        
+
         Method[] methods = service.getClass().getDeclaredMethods();
         Arrays.sort(methods, (m1, m2) -> m1.getName().compareTo(m2.getName()));
-        
+
         int count = 0;
         for (Method method : methods) {
             String name = method.getName();
-            
+
             // 跳过内部方法
-            if (name.startsWith("$") || name.equals("asBinder") || 
+            if (name.startsWith("$") || name.equals("asBinder") ||
                 name.equals("toString") || name.equals("hashCode") ||
                 name.equals("equals") || name.equals("getClass") ||
                 name.equals("notify") || name.equals("notifyAll") ||
                 name.equals("wait")) {
                 continue;
             }
-            
+
             if (filterPattern != null && !filterPattern.matcher(name).find()) {
                 continue;
             }
-            
+
             count++;
-            
+
             if (showSignature) {
                 System.out.println(getFullMethodSignature(method));
             } else {
                 StringBuilder sb = new StringBuilder();
                 sb.append(name);
-                
+
                 if (showParams || showReturn) {
                     sb.append("(");
                     Class<?>[] paramTypes = method.getParameterTypes();
@@ -597,34 +585,34 @@ public class Binder {
                     }
                     sb.append(")");
                 }
-                
+
                 if (showReturn) {
                     sb.append(" -> ");
                     sb.append(getSimpleTypeName(method.getReturnType()));
                 }
-                
+
                 System.out.println("  " + sb.toString());
             }
         }
-        
+
         System.out.println("==========================================");
         System.out.println("Total: " + count + " methods");
     }
 
-    private static void callService(String serviceName, String methodName, 
+    private static void callService(String serviceName, String methodName,
                                    String[] args, String[] types, int userId,
                                    boolean jsonOutput, boolean rawOutput) throws Exception {
         Object service = getServiceProxy(serviceName);
-        
+
         if (!rawOutput && !jsonOutput) {
             System.out.println("Service: " + serviceName);
             System.out.println("Method: " + methodName);
             System.out.println("Arguments: " + Arrays.toString(args));
             System.out.println("------------------------------------------");
         }
-        
+
         Method targetMethod = findBestMethod(service.getClass(), methodName, args, types);
-        
+
         if (targetMethod == null) {
             System.err.println("Method not found: " + methodName);
             System.err.println("\nAvailable methods with similar names:");
@@ -635,13 +623,13 @@ public class Binder {
             }
             throw new RuntimeException("Method not found: " + methodName);
         }
-        
+
         Object[] convertedArgs = convertArgs(targetMethod, args, types);
-        
+
         long startTime = System.currentTimeMillis();
         Object result = targetMethod.invoke(service, convertedArgs);
         long endTime = System.currentTimeMillis();
-        
+
         if (jsonOutput) {
             System.out.println(toJson(result));
         } else if (rawOutput) {
@@ -653,19 +641,19 @@ public class Binder {
         }
     }
 
-    private static void getServiceInfo(String serviceName, boolean verbose, 
+    private static void getServiceInfo(String serviceName, boolean verbose,
                                       boolean json) throws Exception {
         Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
         Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
         Object binder = getServiceMethod.invoke(null, serviceName);
-        
+
         if (binder == null) {
             throw new RuntimeException("Service not found: " + serviceName);
         }
-        
+
         String descriptor = getServiceDescriptor(binder);
         boolean isAlive = pingBinderObject(binder);
-        
+
         if (json) {
             System.out.println("{");
             System.out.println("  \"name\": \"" + serviceName + "\",");
@@ -675,17 +663,17 @@ public class Binder {
             System.out.println("}");
             return;
         }
-        
+
         System.out.println("Service Information: " + serviceName);
         System.out.println("==========================================");
         System.out.println("  Name:      " + serviceName);
         System.out.println("  Interface: " + descriptor);
         System.out.println("  Status:    " + (isAlive ? "✓ ALIVE" : "✗ DEAD"));
         System.out.println("  Class:     " + binder.getClass().getName());
-        
+
         if (verbose) {
             System.out.println("  Binder:    " + binder);
-            
+
             try {
                 Object service = getServiceProxy(serviceName);
                 Method[] methods = service.getClass().getDeclaredMethods();
@@ -699,48 +687,48 @@ public class Binder {
             } catch (Exception e) {
                 System.out.println("  Methods:   [Unable to count]");
             }
-            
+
             if (serviceStubMap.containsKey(serviceName)) {
                 System.out.println("  Stub:      " + serviceStubMap.get(serviceName));
             }
         }
     }
 
-    private static void pingService(String serviceName, int count, 
+    private static void pingService(String serviceName, int count,
                                    int interval) throws Exception {
         Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
         Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
         Object binder = getServiceMethod.invoke(null, serviceName);
-        
+
         if (binder == null) {
             System.out.println("✗ Service not found: " + serviceName);
             return;
         }
-        
+
         int successCount = 0;
         long totalTime = 0;
-        
+
         for (int i = 0; i < count; i++) {
             long start = System.nanoTime();
             boolean isAlive = pingBinderObject(binder);
             long elapsed = (System.nanoTime() - start) / 1000000;
             totalTime += elapsed;
-            
+
             if (isAlive) {
                 successCount++;
                 System.out.printf("ping %s: alive time=%dms%n", serviceName, elapsed);
             } else {
                 System.out.printf("ping %s: dead%n", serviceName);
             }
-            
+
             if (i < count - 1 && interval > 0) {
                 Thread.sleep(interval);
             }
         }
-        
+
         if (count > 1) {
             System.out.println("---");
-            System.out.printf("%d pings, %d success, avg time=%.2fms%n", 
+            System.out.printf("%d pings, %d success, avg time=%.2fms%n",
                              count, successCount, (double) totalTime / count);
         }
     }
@@ -749,20 +737,20 @@ public class Binder {
         Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
         Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
         Object binder = getServiceMethod.invoke(null, serviceName);
-        
+
         if (binder == null) {
             throw new RuntimeException("Service not found: " + serviceName);
         }
-        
+
         System.out.println("Dump: " + serviceName);
         System.out.println("==========================================");
-        
+
         // 尝试多种dump方法
         boolean dumped = false;
-        
+
         // 方法1: dump(FileDescriptor, PrintWriter, String[])
         try {
-            Method dumpMethod = binder.getClass().getMethod("dump", 
+            Method dumpMethod = binder.getClass().getMethod("dump",
                 java.io.FileDescriptor.class, PrintWriter.class, String[].class);
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
@@ -776,11 +764,11 @@ public class Binder {
         } catch (NoSuchMethodException e) {
             // 继续尝试其他方法
         }
-        
+
         // 方法2: dump(FileDescriptor, String[])
         if (!dumped) {
             try {
-                Method dumpMethod = binder.getClass().getMethod("dump", 
+                Method dumpMethod = binder.getClass().getMethod("dump",
                     java.io.FileDescriptor.class, String[].class);
                 dumpMethod.invoke(binder, null, args);
                 System.out.println("(Output may be in logcat)");
@@ -789,31 +777,31 @@ public class Binder {
                 // 继续
             }
         }
-        
+
         if (!dumped) {
             System.out.println("This service does not support dump operation");
         }
     }
 
-    private static void sendRawTransaction(String serviceName, int code, 
+    private static void sendRawTransaction(String serviceName, int code,
                                           String data) throws Exception {
         Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
         Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
         Object binder = getServiceMethod.invoke(null, serviceName);
-        
+
         if (binder == null) {
             throw new RuntimeException("Service not found: " + serviceName);
         }
-        
+
         System.out.println("Sending raw transaction to " + serviceName);
         System.out.println("Code: " + code);
         System.out.println("Data: " + data);
-        
+
         Class<?> parcelClass = Class.forName("android.os.Parcel");
         Method obtainMethod = parcelClass.getMethod("obtain");
         Object dataParcel = obtainMethod.invoke(null);
         Object replyParcel = obtainMethod.invoke(null);
-        
+
         try {
             // 写入interface token
             String descriptor = getServiceDescriptor(binder);
@@ -825,20 +813,20 @@ public class Binder {
                 writeByteArray.invoke(dataParcel, (Object) bytes);
             }
             Class<?> iBinderClass = Class.forName("android.os.IBinder");
-            Method transactMethod = iBinderClass.getMethod("transact", 
+            Method transactMethod = iBinderClass.getMethod("transact",
                 int.class, parcelClass, parcelClass, int.class);
             Boolean result = (Boolean) transactMethod.invoke(binder, code, dataParcel, replyParcel, 0);
-            
+
             System.out.println("------------------------------------------");
             System.out.println("Transaction result: " + result);
             Method dataSize = parcelClass.getMethod("dataSize");
             int replySize = (Integer) dataSize.invoke(replyParcel);
             System.out.println("Reply size: " + replySize + " bytes");
-            
+
             if (replySize > 0) {
                 Method setDataPosition = parcelClass.getMethod("setDataPosition", int.class);
                 setDataPosition.invoke(replyParcel, 0);
-                
+
                 Method marshall = parcelClass.getMethod("marshall");
                 byte[] replyBytes = (byte[]) marshall.invoke(replyParcel);
                 System.out.println("Reply data: " + bytesToHex(replyBytes));
@@ -855,33 +843,33 @@ public class Binder {
         Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
         Method listServicesMethod = serviceManagerClass.getDeclaredMethod("listServices");
         String[] services = (String[]) listServicesMethod.invoke(null);
-        
+
         Pattern p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-        
+
         System.out.println("Search results for: " + pattern);
         System.out.println("==========================================");
-        
+
         int matchCount = 0;
-        
+
         for (String serviceName : services) {
             try {
                 Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
                 Object binder = getServiceMethod.invoke(null, serviceName);
-                
+
                 if (binder == null) continue;
-                
+
                 boolean matched = false;
                 List<String> matchedMethods = new ArrayList<>();
-                
+
                 // 搜索接口名
                 if (searchInterface) {
                     String descriptor = getServiceDescriptor(binder);
-                    if (p.matcher(serviceName).find() || 
+                    if (p.matcher(serviceName).find() ||
                         (descriptor != null && p.matcher(descriptor).find())) {
                         matched = true;
                     }
                 }
-                
+
                 // 搜索方法名
                 if (searchMethods) {
                     try {
@@ -896,7 +884,7 @@ public class Binder {
                         // 忽略
                     }
                 }
-                
+
                 if (matched) {
                     matchCount++;
                     System.out.println("\n[" + serviceName + "]");
@@ -908,21 +896,21 @@ public class Binder {
                 // 忽略错误
             }
         }
-        
+
         System.out.println("\n==========================================");
         System.out.println("Found " + matchCount + " matches");
     }
 
     private static void inspectInterface(String interfaceName) throws Exception {
         String stubName = interfaceName + "$Stub";
-        
+
         try {
             Class<?> stubClass = Class.forName(stubName);
             Class<?> interfaceClass = Class.forName(interfaceName);
-            
+
             System.out.println("Interface: " + interfaceName);
             System.out.println("==========================================");
-            
+
             // 显示transaction codes
             System.out.println("\nTransaction Codes:");
             for (java.lang.reflect.Field field : stubClass.getDeclaredFields()) {
@@ -933,13 +921,13 @@ public class Binder {
                     System.out.printf("  %d: %s%n", code, methodName);
                 }
             }
-            
+
             // 显示方法
             System.out.println("\nMethods:");
             for (Method method : interfaceClass.getDeclaredMethods()) {
                 System.out.println("  " + getFullMethodSignature(method));
             }
-            
+
         } catch (ClassNotFoundException e) {
             System.err.println("Interface not found: " + interfaceName);
         }
@@ -948,10 +936,10 @@ public class Binder {
     private static void extractConstants(String className) throws Exception {
         try {
             Class<?> clazz = Class.forName(className);
-            
+
             System.out.println("Constants from: " + className);
             System.out.println("==========================================");
-            
+
             for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
                 int modifiers = field.getModifiers();
                 if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
@@ -969,15 +957,15 @@ public class Binder {
         }
     }
 
-    private static void exportServiceInterface(String serviceName, 
+    private static void exportServiceInterface(String serviceName,
                                               String format) throws Exception {
         Object service = getServiceProxy(serviceName);
         String descriptor = getServiceDescriptor(getBinderObject(serviceName));
-        
+
         System.out.println("// Generated interface for: " + serviceName);
         System.out.println("// Interface: " + descriptor);
         System.out.println();
-        
+
         switch (format.toLowerCase()) {
             case "java":
                 exportAsJava(service, descriptor);
@@ -992,101 +980,101 @@ public class Binder {
                 System.err.println("Unknown format: " + format);
         }
     }
-    
+
     private static void exportAsJava(Object service, String descriptor) {
-        String interfaceName = descriptor != null ? 
+        String interfaceName = descriptor != null ?
             descriptor.substring(descriptor.lastIndexOf('.') + 1) : "IUnknownService";
-        
+
         System.out.println("public interface " + interfaceName + " {");
-        
+
         for (Method method : service.getClass().getDeclaredMethods()) {
             if (method.getName().startsWith("$") || method.getName().equals("asBinder")) {
                 continue;
             }
-            
+
             StringBuilder sb = new StringBuilder();
             sb.append("    ");
             sb.append(getSimpleTypeName(method.getReturnType()));
             sb.append(" ");
             sb.append(method.getName());
             sb.append("(");
-            
+
             Class<?>[] params = method.getParameterTypes();
             for (int i = 0; i < params.length; i++) {
                 if (i > 0) sb.append(", ");
                 sb.append(getSimpleTypeName(params[i]));
                 sb.append(" arg").append(i);
             }
-            
+
             sb.append(") throws RemoteException;");
             System.out.println(sb.toString());
         }
-        
+
         System.out.println("}");
     }
-    
+
     private static void exportAsKotlin(Object service, String descriptor) {
-        String interfaceName = descriptor != null ? 
+        String interfaceName = descriptor != null ?
             descriptor.substring(descriptor.lastIndexOf('.') + 1) : "IUnknownService";
-        
+
         System.out.println("interface " + interfaceName + " {");
-        
+
         for (Method method : service.getClass().getDeclaredMethods()) {
             if (method.getName().startsWith("$") || method.getName().equals("asBinder")) {
                 continue;
             }
-            
+
             StringBuilder sb = new StringBuilder();
             sb.append("    fun ");
             sb.append(method.getName());
             sb.append("(");
-            
+
             Class<?>[] params = method.getParameterTypes();
             for (int i = 0; i < params.length; i++) {
                 if (i > 0) sb.append(", ");
                 sb.append("arg").append(i).append(": ");
                 sb.append(toKotlinType(params[i]));
             }
-            
+
             sb.append("): ");
             sb.append(toKotlinType(method.getReturnType()));
             System.out.println(sb.toString());
         }
-        
+
         System.out.println("}");
     }
-    
+
     private static void exportAsJson(Object service, String descriptor) {
         System.out.println("{");
         System.out.println("  \"interface\": \"" + descriptor + "\",");
         System.out.println("  \"methods\": [");
-        
+
         Method[] methods = service.getClass().getDeclaredMethods();
         boolean first = true;
-        
+
         for (Method method : methods) {
             if (method.getName().startsWith("$") || method.getName().equals("asBinder")) {
                 continue;
             }
-            
+
             if (!first) System.out.println(",");
             first = false;
-            
+
             System.out.println("    {");
             System.out.println("      \"name\": \"" + method.getName() + "\",");
             System.out.println("      \"returnType\": \"" + method.getReturnType().getName() + "\",");
             System.out.print("      \"parameters\": [");
-            
+
             Class<?>[] params = method.getParameterTypes();
             for (int i = 0; i < params.length; i++) {
                 if (i > 0) System.out.print(", ");
                 System.out.print("\"" + params[i].getName() + "\"");
             }
-            
+
             System.out.println("]");
             System.out.print("    }");
         }
-        
+
         System.out.println("\n  ]");
         System.out.println("}");
     }
@@ -1095,52 +1083,52 @@ public class Binder {
         System.out.println("Binder Interactive Shell v" + VERSION);
         System.out.println("Type 'help' for commands, 'exit' to quit");
         System.out.println();
-        
+
         java.util.Scanner scanner = new java.util.Scanner(System.in);
-        
+
         while (true) {
             System.out.print("binder> ");
             String line = scanner.nextLine().trim();
-            
+
             if (line.isEmpty()) continue;
-            
+
             if (line.equals("exit") || line.equals("quit")) {
                 break;
             }
-            
+
             String[] shellArgs = parseShellArgs(line);
-            
+
             try {
                 main(shellArgs);
             } catch (Exception e) {
                 System.err.println("Error: " + e.getMessage());
             }
-            
+
             System.out.println();
         }
-        
+
         scanner.close();
         System.out.println("Goodbye!");
     }
 
     // ==================== 辅助方法 ====================
-    
+
     private static Object getServiceProxy(String serviceName) throws Exception {
         Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
         Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
         Object binder = getServiceMethod.invoke(null, serviceName);
-        
+
         if (binder == null) {
             throw new RuntimeException("Service not found: " + serviceName);
         }
-        
+
         String stubClassName = getStubClassName(serviceName, binder);
         Class<?> stubClass = Class.forName(stubClassName);
         Class<?> ibinderClass = Class.forName("android.os.IBinder");
         Method asInterfaceMethod = stubClass.getMethod("asInterface", ibinderClass);
         return asInterfaceMethod.invoke(null, binder);
     }
-    
+
     private static Object getBinderObject(String serviceName) throws Exception {
         Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
         Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
@@ -1151,9 +1139,9 @@ public class Binder {
         if (serviceStubMap.containsKey(serviceName)) {
             return serviceStubMap.get(serviceName);
         }
-        
+
         String descriptor = getServiceDescriptor(binder);
-        
+
         if (descriptor != null) {
             String stubName = descriptor + "$Stub";
             try {
@@ -1163,7 +1151,7 @@ public class Binder {
                 // 继续尝试其他方式
             }
         }
-        
+
         String[] prefixes = {
             "android.os.I",
             "android.app.I",
@@ -1178,9 +1166,9 @@ public class Binder {
             "com.android.internal.app.I",
             "com.android.internal.statusbar.I"
         };
-        
+
         String capitalizedName = capitalize(serviceName);
-        
+
         for (String prefix : prefixes) {
             String className = prefix + capitalizedName + "$Stub";
             try {
@@ -1189,7 +1177,7 @@ public class Binder {
             } catch (ClassNotFoundException e) {
                 // 继续
             }
-            
+
             // 尝试带Manager后缀
             className = prefix + capitalizedName + "Manager$Stub";
             try {
@@ -1199,8 +1187,8 @@ public class Binder {
                 // 继续
             }
         }
-        
-        throw new RuntimeException("Cannot find Stub class for service: " + serviceName + 
+
+        throw new RuntimeException("Cannot find Stub class for service: " + serviceName +
                                   " (descriptor: " + descriptor + ")");
     }
 
@@ -1212,7 +1200,7 @@ public class Binder {
             return null;
         }
     }
-    
+
     private static boolean pingBinderObject(Object binder) {
         try {
             Method pingBinderMethod = binder.getClass().getMethod("pingBinder");
@@ -1222,10 +1210,10 @@ public class Binder {
         }
     }
 
-    private static Method findBestMethod(Class<?> clazz, String methodName, 
+    private static Method findBestMethod(Class<?> clazz, String methodName,
                                         String[] args, String[] types) {
         List<Method> candidates = new ArrayList<>();
-        
+
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.getName().equals(methodName)) {
                 if (method.getParameterCount() == args.length) {
@@ -1233,15 +1221,15 @@ public class Binder {
                 }
             }
         }
-        
+
         if (candidates.isEmpty()) {
             return null;
         }
-        
+
         if (candidates.size() == 1) {
             return candidates.get(0);
         }
-        
+
         // 如果指定了类型，根据类型匹配
         if (types != null && types.length > 0) {
             for (Method method : candidates) {
@@ -1260,7 +1248,7 @@ public class Binder {
                 }
             }
         }
-        
+
         // 尝试根据参数值推断类型
         for (Method method : candidates) {
             Class<?>[] paramTypes = method.getParameterTypes();
@@ -1275,7 +1263,7 @@ public class Binder {
                 return method;
             }
         }
-        
+
         return candidates.get(0);
     }
 
@@ -1283,18 +1271,18 @@ public class Binder {
         if (typeAliases.containsKey(typeName.toLowerCase())) {
             return typeAliases.get(typeName.toLowerCase());
         }
-        
+
         try {
             return Class.forName(typeName);
         } catch (ClassNotFoundException e) {
             return null;
         }
     }
-    
+
     private static boolean canConvert(String arg, Class<?> type) {
         if (type == String.class) return true;
         if (arg.equals("null")) return !type.isPrimitive();
-        
+
         try {
             if (type == int.class || type == Integer.class) {
                 Integer.parseInt(arg);
@@ -1318,18 +1306,18 @@ public class Binder {
         } catch (NumberFormatException e) {
             return false;
         }
-        
+
         return false;
     }
 
     private static Object[] convertArgs(Method method, String[] args, String[] types) {
         Class<?>[] paramTypes = method.getParameterTypes();
         Object[] converted = new Object[paramTypes.length];
-        
+
         for (int i = 0; i < paramTypes.length; i++) {
             String arg = i < args.length ? args[i] : "null";
             Class<?> targetType = paramTypes[i];
-            
+
             // 如果指定了类型，优先使用指定的类型
             if (types != null && i < types.length && !types[i].isEmpty()) {
                 Class<?> specifiedType = resolveType(types[i]);
@@ -1337,10 +1325,10 @@ public class Binder {
                     targetType = specifiedType;
                 }
             }
-            
+
             converted[i] = convertArg(arg, targetType, paramTypes[i]);
         }
-        
+
         return converted;
     }
 
@@ -1349,7 +1337,7 @@ public class Binder {
         if (constantsMap.containsKey(arg)) {
             Object constant = constantsMap.get(arg);
             if (constant == null) return null;
-            
+
             // 尝试类型转换
             if (paramType.isInstance(constant)) {
                 return constant;
@@ -1360,12 +1348,12 @@ public class Binder {
                 }
             }
         }
-        
+
         // null处理
         if (arg.equals("null") || arg.equals("NULL")) {
             return null;
         }
-        
+
         // 基本类型转换
         if (paramType == String.class) {
             // 处理转义字符串
@@ -1374,73 +1362,73 @@ public class Binder {
             }
             return arg;
         }
-        
+
         if (paramType == int.class || paramType == Integer.class) {
             return parseIntArg(arg);
         }
-        
+
         if (paramType == long.class || paramType == Long.class) {
             return parseLongArg(arg);
         }
-        
+
         if (paramType == boolean.class || paramType == Boolean.class) {
             return parseBooleanArg(arg);
         }
-        
+
         if (paramType == float.class || paramType == Float.class) {
             return Float.parseFloat(arg);
         }
-        
+
         if (paramType == double.class || paramType == Double.class) {
             return Double.parseDouble(arg);
         }
-        
+
         if (paramType == byte.class || paramType == Byte.class) {
             return Byte.parseByte(arg);
         }
-        
+
         if (paramType == short.class || paramType == Short.class) {
             return Short.parseShort(arg);
         }
-        
+
         if (paramType == char.class || paramType == Character.class) {
             return arg.length() > 0 ? arg.charAt(0) : '\0';
         }
-        
+
         // 数组类型
         if (paramType.isArray()) {
             return parseArray(arg, paramType.getComponentType());
         }
-        
+
         // List类型
         if (List.class.isAssignableFrom(paramType)) {
             return parseList(arg);
         }
-        
+
         // ComponentName
         if (paramType.getName().equals("android.content.ComponentName")) {
             return parseComponentName(arg);
         }
-        
+
         // Intent
         if (paramType.getName().equals("android.content.Intent")) {
             return parseIntent(arg);
         }
-        
+
         // Bundle
         if (paramType.getName().equals("android.os.Bundle")) {
             return parseBundle(arg);
         }
-        
+
         // Uri
         if (paramType.getName().equals("android.net.Uri")) {
             return parseUri(arg);
         }
-        
+
         // 尝试直接返回字符串
         return arg;
     }
-    
+
     private static int parseIntArg(String arg) {
         if (constantsMap.containsKey(arg)) {
             Object val = constantsMap.get(arg);
@@ -1448,17 +1436,17 @@ public class Binder {
                 return ((Number) val).intValue();
             }
         }
-        
+
         // 支持十六进制
         if (arg.startsWith("0x") || arg.startsWith("0X")) {
             return Integer.parseInt(arg.substring(2), 16);
         }
-        
+
         // 支持二进制
         if (arg.startsWith("0b") || arg.startsWith("0B")) {
             return Integer.parseInt(arg.substring(2), 2);
         }
-        
+
         // 支持八进制
         if (arg.startsWith("0") && arg.length() > 1 && !arg.contains(".")) {
             try {
@@ -1467,23 +1455,23 @@ public class Binder {
                 // 继续尝试十进制
             }
         }
-        
+
         return Integer.parseInt(arg);
     }
-    
+
     private static long parseLongArg(String arg) {
         String s = arg;
         if (s.endsWith("L") || s.endsWith("l")) {
             s = s.substring(0, s.length() - 1);
         }
-        
+
         if (s.startsWith("0x") || s.startsWith("0X")) {
             return Long.parseLong(s.substring(2), 16);
         }
-        
+
         return Long.parseLong(s);
     }
-    
+
     private static boolean parseBooleanArg(String arg) {
         if (arg.equalsIgnoreCase("true") || arg.equals("1")) {
             return true;
@@ -1493,54 +1481,54 @@ public class Binder {
         }
         throw new IllegalArgumentException("Invalid boolean value: " + arg);
     }
-    
+
     private static Object parseArray(String arg, Class<?> componentType) {
         // 格式: [elem1,elem2,elem3] 或 空数组 []
         if (arg.equals("[]") || arg.isEmpty()) {
             return Array.newInstance(componentType, 0);
         }
-        
+
         String content = arg;
         if (content.startsWith("[") && content.endsWith("]")) {
             content = content.substring(1, content.length() - 1);
         }
-        
+
         if (content.isEmpty()) {
             return Array.newInstance(componentType, 0);
         }
-        
+
         String[] parts = content.split(",");
         Object array = Array.newInstance(componentType, parts.length);
-        
+
         for (int i = 0; i < parts.length; i++) {
             Object value = convertArg(parts[i].trim(), componentType, componentType);
             Array.set(array, i, value);
         }
-        
+
         return array;
     }
-    
+
     private static List<?> parseList(String arg) {
         if (arg.equals("[]") || arg.isEmpty()) {
             return new ArrayList<>();
         }
-        
+
         String content = arg;
         if (content.startsWith("[") && content.endsWith("]")) {
             content = content.substring(1, content.length() - 1);
         }
-        
+
         List<String> list = new ArrayList<>();
         for (String part : content.split(",")) {
             list.add(part.trim());
         }
         return list;
     }
-    
+
     private static Object parseComponentName(String arg) {
         try {
             Class<?> cnClass = Class.forName("android.content.ComponentName");
-            
+
             // 格式: package/class 或 package/.class
             if (arg.contains("/")) {
                 String[] parts = arg.split("/");
@@ -1552,28 +1540,28 @@ public class Binder {
                 return cnClass.getConstructor(String.class, String.class)
                              .newInstance(pkg, cls);
             }
-            
+
             return null;
         } catch (Exception e) {
             return null;
         }
     }
-    
+
     private static Object parseIntent(String arg) {
         try {
             Class<?> intentClass = Class.forName("android.content.Intent");
             Object intent = intentClass.newInstance();
-            
+
             // 简单格式: action 或 action;uri
             if (arg.contains(";")) {
                 String[] parts = arg.split(";");
                 Method setAction = intentClass.getMethod("setAction", String.class);
                 setAction.invoke(intent, parts[0]);
-                
+
                 if (parts.length > 1) {
                     Object uri = parseUri(parts[1]);
                     if (uri != null) {
-                        Method setData = intentClass.getMethod("setData", 
+                        Method setData = intentClass.getMethod("setData",
                             Class.forName("android.net.Uri"));
                         setData.invoke(intent, uri);
                     }
@@ -1582,43 +1570,43 @@ public class Binder {
                 Method setAction = intentClass.getMethod("setAction", String.class);
                 setAction.invoke(intent, arg);
             }
-            
+
             return intent;
         } catch (Exception e) {
             return null;
         }
     }
-    
+
     private static Object parseBundle(String arg) {
         try {
             Class<?> bundleClass = Class.forName("android.os.Bundle");
             Object bundle = bundleClass.newInstance();
-            
+
             if (arg.equals("{}") || arg.isEmpty()) {
                 return bundle;
             }
-            
+
             // 格式: {key1:value1,key2:value2}
             String content = arg;
             if (content.startsWith("{") && content.endsWith("}")) {
                 content = content.substring(1, content.length() - 1);
             }
-            
+
             Method putString = bundleClass.getMethod("putString", String.class, String.class);
-            
+
             for (String pair : content.split(",")) {
                 String[] kv = pair.split(":");
                 if (kv.length == 2) {
                     putString.invoke(bundle, kv[0].trim(), kv[1].trim());
                 }
             }
-            
+
             return bundle;
         } catch (Exception e) {
             return null;
         }
     }
-    
+
     private static Object parseUri(String arg) {
         try {
             Class<?> uriClass = Class.forName("android.net.Uri");
@@ -1633,16 +1621,16 @@ public class Binder {
         if (result == null) {
             return "null";
         }
-        
+
         String prefix = repeat("  ", indent);
-        
+
         // 数组处理
         if (result.getClass().isArray()) {
             int length = Array.getLength(result);
             if (length == 0) {
                 return "[]";
             }
-            
+
             StringBuilder sb = new StringBuilder();
             sb.append("[\n");
             for (int i = 0; i < length; i++) {
@@ -1654,14 +1642,14 @@ public class Binder {
             sb.append(prefix).append("]");
             return sb.toString();
         }
-        
+
         // List处理
         if (result instanceof List) {
             List<?> list = (List<?>) result;
             if (list.isEmpty()) {
                 return "[]";
             }
-            
+
             StringBuilder sb = new StringBuilder();
             sb.append("[\n");
             int i = 0;
@@ -1673,14 +1661,14 @@ public class Binder {
             sb.append(prefix).append("]");
             return sb.toString();
         }
-        
+
         // Map处理
         if (result instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) result;
             if (map.isEmpty()) {
                 return "{}";
             }
-            
+
             StringBuilder sb = new StringBuilder();
             sb.append("{\n");
             for (Map.Entry<?, ?> entry : map.entrySet()) {
@@ -1692,17 +1680,17 @@ public class Binder {
             sb.append(prefix).append("}");
             return sb.toString();
         }
-        
+
         // 尝试反射获取字段信息
         Class<?> clazz = result.getClass();
         if (!clazz.isPrimitive() && !clazz.getName().startsWith("java.lang")) {
             try {
                 StringBuilder sb = new StringBuilder();
                 sb.append(clazz.getSimpleName()).append(" {\n");
-                
+
                 for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
                     if (Modifier.isStatic(field.getModifiers())) continue;
-                    
+
                     field.setAccessible(true);
                     Object value = field.get(result);
                     sb.append(prefix).append("  ");
@@ -1710,28 +1698,28 @@ public class Binder {
                     sb.append(value);
                     sb.append("\n");
                 }
-                
+
                 sb.append(prefix).append("}");
                 return sb.toString();
             } catch (Exception e) {
                 // 回退到toString
             }
         }
-        
+
         return result.toString();
     }
 
     private static String toJson(Object obj) {
         if (obj == null) return "null";
-        
+
         if (obj instanceof String) {
             return "\"" + escapeJson((String) obj) + "\"";
         }
-        
+
         if (obj instanceof Number || obj instanceof Boolean) {
             return obj.toString();
         }
-        
+
         if (obj.getClass().isArray()) {
             StringBuilder sb = new StringBuilder("[");
             int length = Array.getLength(obj);
@@ -1742,7 +1730,7 @@ public class Binder {
             sb.append("]");
             return sb.toString();
         }
-        
+
         if (obj instanceof List) {
             StringBuilder sb = new StringBuilder("[");
             List<?> list = (List<?>) obj;
@@ -1755,7 +1743,7 @@ public class Binder {
             sb.append("]");
             return sb.toString();
         }
-        
+
         if (obj instanceof Map) {
             StringBuilder sb = new StringBuilder("{");
             Map<?, ?> map = (Map<?, ?>) obj;
@@ -1769,10 +1757,10 @@ public class Binder {
             sb.append("}");
             return sb.toString();
         }
-        
+
         return "\"" + escapeJson(obj.toString()) + "\"";
     }
-    
+
     private static String escapeJson(String s) {
         return s.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
@@ -1784,22 +1772,22 @@ public class Binder {
     private static void printBinderStats() throws Exception {
         System.out.println("Binder Statistics");
         System.out.println("==========================================");
-        
+
         // 尝试获取Binder统计信息
         try {
             Class<?> binderClass = Class.forName("android.os.Binder");
-            
+
             // 获取当前进程的Binder调用统计
             Method getCallingPid = binderClass.getMethod("getCallingPid");
             Method getCallingUid = binderClass.getMethod("getCallingUid");
-            
+
             System.out.println("Current Process:");
             System.out.println("  Calling PID: " + getCallingPid.invoke(null));
             System.out.println("  Calling UID: " + getCallingUid.invoke(null));
         } catch (Exception e) {
             System.out.println("Limited statistics available: " + e.getMessage());
         }
-        
+
         // 列出服务数量
         try {
             Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
@@ -1812,7 +1800,7 @@ public class Binder {
     }
 
     // ==================== 工具方法 ====================
-    
+
     private static void printUsage() {
         System.out.println("Binder Command Line Tool v" + VERSION);
         System.out.println("==========================================");
@@ -1840,7 +1828,7 @@ public class Binder {
         System.out.println();
         System.out.println("Use 'binder help <command>' for more info.");
     }
-    
+
     private static void printCommandHelp(String command) {
         switch (command) {
             case "list":
@@ -1856,7 +1844,7 @@ public class Binder {
                 System.out.println("  -f, --filter <pattern>");
                 System.out.println("                  Filter by name pattern (regex)");
                 break;
-                
+
             case "call":
             case "c":
                 System.out.println("binder call <service> <method> [options] [args...]");
@@ -1883,7 +1871,7 @@ public class Binder {
                 System.out.println("Constants:");
                 System.out.println("  FLAG_ACTIVITY_NEW_TASK, USER_CURRENT, etc.");
                 break;
-                
+
             case "methods":
             case "m":
                 System.out.println("binder methods <service> [options]");
@@ -1897,7 +1885,7 @@ public class Binder {
                 System.out.println("  -r, --return    Show return types");
                 System.out.println("  -s, --signature Show full signatures");
                 break;
-                
+
             default:
                 System.out.println("No detailed help for: " + command);
                 printUsage();
@@ -1912,7 +1900,7 @@ public class Binder {
         System.arraycopy(args, startIndex, extra, 0, extra.length);
         return extra;
     }
-    
+
     private static boolean hasFlag(String[] args, String... flags) {
         for (String arg : args) {
             for (String flag : flags) {
@@ -1923,7 +1911,7 @@ public class Binder {
         }
         return false;
     }
-    
+
     private static int getIntFlag(String[] args, String shortFlag, String longFlag, int defaultValue) {
         for (int i = 0; i < args.length - 1; i++) {
             if (args[i].equals(shortFlag) || args[i].equals(longFlag)) {
@@ -1936,7 +1924,7 @@ public class Binder {
         }
         return defaultValue;
     }
-    
+
     private static String getStringFlag(String[] args, String shortFlag, String longFlag, String defaultValue) {
         for (int i = 0; i < args.length - 1; i++) {
             if (args[i].equals(shortFlag) || args[i].equals(longFlag)) {
@@ -1945,7 +1933,7 @@ public class Binder {
         }
         return defaultValue;
     }
-    
+
     private static boolean isDebugMode(String[] args) {
         return hasFlag(args, "--debug", "-D");
     }
@@ -1971,22 +1959,22 @@ public class Binder {
         int lastDot = name.lastIndexOf('.');
         return lastDot >= 0 ? name.substring(lastDot + 1) : name;
     }
-    
+
         private static String getFullMethodSignature(Method method) {
         StringBuilder sb = new StringBuilder();
         sb.append(getSimpleTypeName(method.getReturnType()));
         sb.append(" ");
         sb.append(method.getName());
         sb.append("(");
-        
+
         Class<?>[] params = method.getParameterTypes();
         for (int i = 0; i < params.length; i++) {
             if (i > 0) sb.append(", ");
             sb.append(getSimpleTypeName(params[i]));
         }
-        
+
         sb.append(")");
-        
+
         // 添加异常信息
         Class<?>[] exceptions = method.getExceptionTypes();
         if (exceptions.length > 0) {
@@ -1996,10 +1984,10 @@ public class Binder {
                 sb.append(getSimpleTypeName(exceptions[i]));
             }
         }
-        
+
         return sb.toString();
     }
-    
+
     private static String toKotlinType(Class<?> type) {
         if (type == void.class) return "Unit";
         if (type == int.class) return "Int";
@@ -2016,7 +2004,7 @@ public class Binder {
         if (type == Double.class) return "Double?";
         if (type == Boolean.class) return "Boolean?";
         if (type == String.class) return "String?";
-        
+
         if (type.isArray()) {
             Class<?> componentType = type.getComponentType();
             if (componentType == int.class) return "IntArray";
@@ -2029,10 +2017,10 @@ public class Binder {
             if (componentType == char.class) return "CharArray";
             return "Array<" + toKotlinType(componentType) + ">";
         }
-        
+
         return getSimpleTypeName(type) + "?";
     }
-    
+
     private static String repeat(String str, int times) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < times; i++) {
@@ -2040,23 +2028,23 @@ public class Binder {
         }
         return sb.toString();
     }
-    
+
     private static byte[] hexToBytes(String hex) {
         if (hex.startsWith("0x") || hex.startsWith("0X")) {
             hex = hex.substring(2);
         }
-        
+
         int len = hex.length();
         byte[] data = new byte[len / 2];
-        
+
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
                                  + Character.digit(hex.charAt(i + 1), 16));
         }
-        
+
         return data;
     }
-    
+
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
@@ -2064,28 +2052,28 @@ public class Binder {
         }
         return sb.toString();
     }
-    
+
     private static String[] parseShellArgs(String line) {
         List<String> args = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         boolean inQuotes = false;
         char quoteChar = 0;
         boolean escaped = false;
-        
+
         for (int i = 0; i < line.length(); i++) {
             char c = line.charAt(i);
-            
+
             if (escaped) {
                 current.append(c);
                 escaped = false;
                 continue;
             }
-            
+
             if (c == '\\') {
                 escaped = true;
                 continue;
             }
-            
+
             if (c == '"' || c == '\'') {
                 if (!inQuotes) {
                     inQuotes = true;
@@ -2098,7 +2086,7 @@ public class Binder {
                 }
                 continue;
             }
-            
+
             if (c == ' ' && !inQuotes) {
                 if (current.length() > 0) {
                     args.add(current.toString());
@@ -2106,31 +2094,31 @@ public class Binder {
                 }
                 continue;
             }
-            
+
             current.append(c);
         }
-        
+
         if (current.length() > 0) {
             args.add(current.toString());
         }
-        
+
         return args.toArray(new String[0]);
     }
-    
+
     // ==================== 额外功能方法 ====================
-    
+
     /**
      * 获取服务的所有transaction codes
      */
     private static Map<Integer, String> getTransactionCodes(String serviceName) throws Exception {
         Map<Integer, String> codes = new HashMap<>();
-        
+
         Object binder = getBinderObject(serviceName);
         if (binder == null) return codes;
-        
+
         String stubClassName = getStubClassName(serviceName, binder);
         Class<?> stubClass = Class.forName(stubClassName);
-        
+
         for (java.lang.reflect.Field field : stubClass.getDeclaredFields()) {
             if (field.getName().startsWith("TRANSACTION_")) {
                 field.setAccessible(true);
@@ -2139,35 +2127,35 @@ public class Binder {
                 codes.put(code, methodName);
             }
         }
-        
+
         return codes;
     }
-    
+
     /**
      * 比较两个服务的接口差异
      */
     public static void compareServices(String service1, String service2) throws Exception {
         Object proxy1 = getServiceProxy(service1);
         Object proxy2 = getServiceProxy(service2);
-        
+
         Set<String> methods1 = new HashSet<>();
         Set<String> methods2 = new HashSet<>();
-        
+
         for (Method m : proxy1.getClass().getDeclaredMethods()) {
             if (!m.getName().startsWith("$")) {
                 methods1.add(m.getName());
             }
         }
-        
+
         for (Method m : proxy2.getClass().getDeclaredMethods()) {
             if (!m.getName().startsWith("$")) {
                 methods2.add(m.getName());
             }
         }
-        
+
         System.out.println("Service Comparison: " + service1 + " vs " + service2);
         System.out.println("==========================================");
-        
+
         // 仅在service1中
         Set<String> only1 = new HashSet<>(methods1);
         only1.removeAll(methods2);
@@ -2177,7 +2165,7 @@ public class Binder {
                 System.out.println("  + " + m);
             }
         }
-        
+
         // 仅在service2中
         Set<String> only2 = new HashSet<>(methods2);
         only2.removeAll(methods1);
@@ -2187,13 +2175,13 @@ public class Binder {
                 System.out.println("  + " + m);
             }
         }
-        
+
         // 共同的方法
         Set<String> common = new HashSet<>(methods1);
         common.retainAll(methods2);
         System.out.println("\nCommon methods: " + common.size());
     }
-    
+
     /**
      * 获取服务的权限要求（如果可用）
      */
@@ -2202,7 +2190,7 @@ public class Binder {
         System.out.println("==========================================");
         System.out.println("Note: Permission detection requires runtime analysis");
         System.out.println("      or access to service implementation.");
-        
+
         // 常见服务的已知权限
         Map<String, String[]> knownPermissions = new HashMap<>();
         knownPermissions.put("activity", new String[]{
@@ -2233,7 +2221,7 @@ public class Binder {
             "android.permission.ACCESS_COARSE_LOCATION",
             "android.permission.ACCESS_BACKGROUND_LOCATION"
         });
-        
+
         if (knownPermissions.containsKey(serviceName)) {
             System.out.println("\nKnown permissions:");
             for (String perm : knownPermissions.get(serviceName)) {
@@ -2243,23 +2231,23 @@ public class Binder {
             System.out.println("\nNo known permission data for this service.");
         }
     }
-    
+
     /**
      * 测试服务方法的调用（dry run模式）
      */
     public static void testServiceMethod(String serviceName, String methodName) throws Exception {
         Object service = getServiceProxy(serviceName);
-        
+
         System.out.println("Test Information for: " + serviceName + "." + methodName);
         System.out.println("==========================================");
-        
+
         boolean found = false;
         for (Method method : service.getClass().getDeclaredMethods()) {
             if (method.getName().equals(methodName)) {
                 found = true;
                 System.out.println("\nMethod: " + getFullMethodSignature(method));
                 System.out.println("Parameters:");
-                
+
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0) {
                     System.out.println("  (none)");
@@ -2267,13 +2255,13 @@ public class Binder {
                     for (int i = 0; i < paramTypes.length; i++) {
                         Class<?> type = paramTypes[i];
                         String defaultValue = getDefaultValueString(type);
-                        System.out.printf("  [%d] %s (default: %s)%n", 
+                        System.out.printf("  [%d] %s (default: %s)%n",
                                          i, getSimpleTypeName(type), defaultValue);
                     }
                 }
-                
+
                 System.out.println("Return type: " + getSimpleTypeName(method.getReturnType()));
-                
+
                 Class<?>[] exceptions = method.getExceptionTypes();
                 if (exceptions.length > 0) {
                     System.out.println("Throws:");
@@ -2284,12 +2272,12 @@ public class Binder {
                 System.out.println();
             }
         }
-        
+
         if (!found) {
             System.out.println("Method not found: " + methodName);
         }
     }
-    
+
     private static String getDefaultValueString(Class<?> type) {
         if (type == int.class || type == Integer.class) return "0";
         if (type == long.class || type == Long.class) return "0L";
@@ -2303,44 +2291,44 @@ public class Binder {
         if (type.isArray()) return "[]";
         return "null";
     }
-    
+
     /**
      * 生成服务调用示例代码
      */
     public static void generateExample(String serviceName, String methodName) throws Exception {
         Object service = getServiceProxy(serviceName);
         String descriptor = getServiceDescriptor(getBinderObject(serviceName));
-        
+
         for (Method method : service.getClass().getDeclaredMethods()) {
             if (method.getName().equals(methodName)) {
                 System.out.println("// Example code for calling " + serviceName + "." + methodName);
                 System.out.println();
                 System.out.println("// Java:");
                 System.out.println("IBinder binder = ServiceManager.getService(\"" + serviceName + "\");");
-                
-                String interfaceName = descriptor != null ? 
+
+                String interfaceName = descriptor != null ?
                     descriptor.substring(descriptor.lastIndexOf('.') + 1) : "IService";
                 String stubName = interfaceName + ".Stub";
-                
+
                 System.out.println(interfaceName + " service = " + stubName + ".asInterface(binder);");
-                
+
                 StringBuilder call = new StringBuilder();
                 call.append("service.").append(methodName).append("(");
-                
+
                 Class<?>[] params = method.getParameterTypes();
                 for (int i = 0; i < params.length; i++) {
                     if (i > 0) call.append(", ");
                     call.append(getDefaultValueString(params[i]));
                 }
                 call.append(");");
-                
+
                 if (method.getReturnType() != void.class) {
-                    System.out.println(getSimpleTypeName(method.getReturnType()) + 
+                    System.out.println(getSimpleTypeName(method.getReturnType()) +
                                       " result = " + call.toString());
                 } else {
                     System.out.println(call.toString());
                 }
-                
+
                 System.out.println();
                 System.out.println("// Shell (using this tool):");
                 System.out.print("binder call " + serviceName + " " + methodName);
@@ -2348,14 +2336,14 @@ public class Binder {
                     System.out.print(" " + getDefaultValueString(params[i]).replace("\"", ""));
                 }
                 System.out.println();
-                
+
                 return;
             }
         }
-        
+
         System.out.println("Method not found: " + methodName);
     }
-    
+
     /**
      * 监控特定服务的方法调用（需要root或调试权限）
      */
@@ -2366,23 +2354,23 @@ public class Binder {
         System.out.println("Note: Full tracing requires systrace or perfetto.");
         System.out.println("This is a simplified version that monitors service state.");
         System.out.println();
-        
+
         Object binder = getBinderObject(serviceName);
         if (binder == null) {
             System.out.println("Service not found!");
             return;
         }
-        
+
         long endTime = System.currentTimeMillis() + (durationSeconds * 1000L);
         int checkCount = 0;
-        
+
         while (System.currentTimeMillis() < endTime) {
             boolean alive = pingBinderObject(binder);
-            System.out.printf("[%d] Service %s: %s%n", 
+            System.out.printf("[%d] Service %s: %s%n",
                              checkCount++, serviceName, alive ? "alive" : "dead");
             Thread.sleep(500);
         }
-        
+
         System.out.println();
         System.out.println("Trace completed. " + checkCount + " checks performed.");
     }

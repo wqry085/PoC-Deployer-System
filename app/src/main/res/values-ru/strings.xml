@@ -11,7 +11,7 @@
     <string name="dev_home">Профиль разработчика на Coolapk</string>
     <string name="project_category">Проект</string>
     <string name="zygotelog_help">Это запустит локальный слушатель сокетов для службы логов zygote, требующий авторизации прав Shizuku\n\nПосле успешного запуска введите nc 127.0.0.1 13568 в эмуляторе терминала\nВведите STOP в консоли для завершения логирования\nПереключайте режимы работы командами TRY_GREP/TRY_PID</string>
-    
+
     <!-- ZygoteActivity - Dialogs -->
     <string name="apply">Применить</string>
     <string name="cancel">Отмена</string>
@@ -141,6 +141,8 @@
     <string name="pref_category_injection">Инъекция</string>
     <string name="pref_command_input">Ввод команды инъекции</string>
     <string name="pref_command_dialog">Ввод команды Shell</string>
+    <string name="pref_lib_shizuku_path">Путь к Shizuku</string>
+    <string name="pref_lib_shizuku_path_dialog">Ввод пути к libshizuku.so</string>
     <string name="pref_uid_input">UID инъекции</string>
     <string name="pref_uid_dialog">Введите действительный UID</string>
     <string name="pref_gid_input">GID инъекции</string>
@@ -165,6 +167,8 @@
     <string name="pref_terminal">Эмулятор терминала</string>
     <string name="pref_terminal_summary">Легковесный эмулятор терминала со встроенными командами</string>
     <string name="pref_execute_btn">Выполнить команду</string>
+    <string name="pref_run_shizuku_btn">Запустить Shizuku(system)</string>
+    <string name="pref_run_shizuku_summary">Shizuku запустится с правами (uid 1000)</string>
     <string name="pref_execute_summary">Инъекция произойдет немедленно</string>
 
     <string name="pref_category_server">Управление сервером</string>
@@ -259,7 +263,7 @@
     <string name="folder_receiver_waiting_for_connection">Ожидание подключения клиента к порту %d...</string>
     <string name="folder_receiver_server_start_failed">Ошибка запуска сервера: %s</string>
     <string name="folder_receiver_starting_file_receive">Начало приема файлов...</string>
-    <string name="folder_receiver_receiving_file_progress">Прием файла: %s (%s)\nПрогресс: %d/%d</string>
+    <string name="folder_receiver_receiving_file_progress">Прием файла: %1$s (%2$s)\nПрогресс: %3$d/%4$d</string>
     <string name="folder_receiver_creating_directory">Создание каталога: %s</string>
     <string name="folder_receiver_receive_complete">Прием файлов завершен, всего получено файлов: %d</string>
     <string name="folder_receiver_ready_for_next">Готов к следующей передаче...</string>
@@ -279,5 +283,32 @@
 
     <string name="disclaimer_title">ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ И ПРЕДУПРЕЖДЕНИЕ</string>
     <string name="disclaimer_content">Этот инструмент (PoC-Deployer-System) включает расширенные модификации системы, включая инъекцию Zygote и манипуляции с ядром.\n\nРазблокируя, вы соглашаетесь с тем, что:\n1. Вы несете полную ответственность за любой ущерб вашему устройству (циклические перезагрузки, кирпич, потеря данных).\n2. Разработчик НЕ несет ответственности за любые последствия использования этого программного обеспечения.\n3. Вы понимаете, что это бета-версия, предназначенная только для тестирования и образовательных целей.\n\nЕсли вы не согласны, немедленно удалите это приложение.</string>
+    <string name="daemon_status_checking" >Проверка состояния демона...</string>
+
+    <string name="enable_whitelist">Включить белый список</string>
+    <string name="display_system_application">Показывать системные приложения</string>
+    <string name="authorize_this_app">Authorize this app</string>
+    <string name="checking_daemon_status">Проверка состояния демона…</string>
+    <string name="daemon_not_running">⚠️ Демон политик не запущен</string>
+    <string name="error_daemon_not_running">Демон политик не запущен, сначала запустите службу</string>
+    <string name="whitelist_enabled">Белый список включен</string>
+    <string name="whitelist_disabled">Белый список выключен</string>
+    <string name="operation_failed">Операция не удалась</string>
+    <string name="search_apps_hint">Поиск приложений…</string>
+    <string name="log_zygote_capture_started">Начало захвата логов Zygote в реальном времени...</string>
+    <string name="log_reconnect_waiting">Ожидание %1$d сек. перед повторным подключением... (Попытка №%2$d)</string>
+    <string name="log_connecting_server">Подключение к серверу логов…</string>
+    <string name="log_connected_to_server">✓ Подключено к серверу логов</string>
+    <string name="log_server_disconnected">Сервер разорвал соединение</string>
+    <string name="log_connection_interrupted">Соединение прервано: %1$s</string>
+    <string name="cfg_null">Конфигурация отсутствует (Null)</string>
+    <string name="cfg_total_lines">Всего строк: %1$d\n</string>
+    <string name="cfg_counter_line">Заголовок/Счетчик: \'%1$s\'\n</string>
+    <string name="cfg_empty_line">Пустая строка %1$d: позиция %2$d\n</string>
+    <string name="cfg_param_line">Параметр %1$d: \'%2$s\'\n</string>
+    <string name="cfg_non_empty_summary">Непустых строк с параметрами: %1$d\n</string>
+    <string name="cfg_empty_summary">Пустых строк: %1$d\n</string>
+    <string name="zygote_warning">Эта функция не всегда работает стабильно.\nВозможен сбой при создании процесса Zygote.</string>
+    <string name="hint_enter_package_name">Введите имя пакета приложения</string>
 
 </resources>

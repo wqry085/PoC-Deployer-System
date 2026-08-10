@@ -11,7 +11,7 @@
     <string name="dev_home">Perfil del desarrollador en Coolapk</string>
     <string name="project_category">Proyecto</string>
     <string name="zygotelog_help">Esto iniciará un oyente de socket local para el servicio de registro de zygote, requiriendo autorización de permiso de Shizuku\n\nDespués del inicio exitoso, ingrese nc 127.0.0.1 13568 en el emulador de terminal\nIngrese STOP en la consola para finalizar el registro\nCambie los modos de trabajo a través de los comandos TRY_GREP/TRY_PID</string>
-    
+
     <!-- ZygoteActivity - Dialogs -->
     <string name="apply">Aplicar</string>
     <string name="cancel">Cancelar</string>
@@ -259,7 +259,7 @@
     <string name="folder_receiver_waiting_for_connection">Esperando que el cliente se conecte al puerto %d...</string>
     <string name="folder_receiver_server_start_failed">Inicio del servidor fallido: %s</string>
     <string name="folder_receiver_starting_file_receive">Comenzando a recibir archivos...</string>
-    <string name="folder_receiver_receiving_file_progress">Recibiendo archivo: %s (%s)\nProgreso: %d/%d</string>
+    <string name="folder_receiver_receiving_file_progress">Recibiendo archivo: %1$s (%2$s)\nProgreso: %3$d/%4$d</string>
     <string name="folder_receiver_creating_directory">Creando directorio: %s</string>
     <string name="folder_receiver_receive_complete">Recepción de archivos completa, %d archivos recibidos en total</string>
     <string name="folder_receiver_ready_for_next">Listo para la siguiente transmisión...</string>
@@ -279,5 +279,9 @@
 
     <string name="disclaimer_title">DESCARGO DE RESPONSABILIDAD Y ADVERTENCIA</string>
     <string name="disclaimer_content">Esta herramienta (PoC-Deployer-System) implica modificaciones avanzadas del sistema, incluida la inyección de Zygote y la manipulación del núcleo.\n\nAl deslizar para desbloquear, aceptas que:\n1. Aceptas la responsabilidad total de cualquier daño a tu dispositivo (bucles de arranque, brick, pérdida de datos).\n2. El desarrollador NO es responsable de las consecuencias del uso de este software.\n3. Entiendes que esta es una versión BETA destinada solo a fines de prueba y educativos.\n\nSi no estás de acuerdo, desinstala esta aplicación inmediatamente.</string>
+    <string name="daemon_status_checking" >Checking daemon status...</string>
+    <string name="enable_whitelist">Enable whitelist</string>
+    <string name="display_system_application">Display system application</string>
+    <string name="authorize_this_app">Authorize this app</string>
 
 </resources>

@@ -15,7 +15,7 @@
         android:background="#FFF3E0"
         android:textColor="#E65100"
         android:visibility="gone"
-        android:text="检查守护进程状态..."
+        android:text="@string/checking_daemon_status"
         android:layout_marginBottom="8dp" />
 
     <!-- 白名单开关 -->
@@ -31,7 +31,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="启用白名单"
+            android:text="@string/enable_whitelist"
             android:textSize="16sp" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
@@ -54,7 +54,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="显示系统应用"
+            android:text="@string/display_system_application"
             android:textSize="16sp" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
@@ -69,7 +69,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        app:queryHint="搜索应用..."
+        app:queryHint="@string/search_apps_hint"
         app:iconifiedByDefault="false" />
 
     <!-- 加载进度条 -->

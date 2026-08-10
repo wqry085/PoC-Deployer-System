@@ -36,19 +36,19 @@ public class HelpFragment extends Fragment {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
-    
+
     private ExecutorService logExecutor;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final AtomicBoolean isConnected = new AtomicBoolean(false);
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    
+
     private int currentReconnectDelay = INITIAL_RECONNECT_DELAY;
     private int reconnectCount = 0;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, 
-                             @Nullable ViewGroup container, 
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_help, container, false);
         initLogView(view);
@@ -66,16 +66,16 @@ public class HelpFragment extends Fragment {
      */
     private void initLogView(View view) {
         logView = view.findViewById(R.id.zygotelog);
-        
+
         if (logView == null) {
             Log.e(TAG, "LogView not found in layout!");
             return;
         }
-        
+
         logView.setShowStatusBar(true);
         logView.setShowLineNumbers(true);
         logView.setMonokaiTheme();
-        logView.setTextSize(6f);
+        logView.setTextSize(10f);
         logView.setScaleRange(8f, 28f);
     }
 
@@ -87,17 +87,18 @@ public class HelpFragment extends Fragment {
             Log.w(TAG, "Logging already running");
             return;
         }
-        
+
         isRunning.set(true);
         resetReconnectState();
-        
+
         logExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "LogReaderThread");
             t.setDaemon(true);
             return t;
         });
-        
-        appendLogSafe("System", "开始实时捕获 Zygote 日志...");
+
+        appendLogSafe("System", getContext().getString(R.string.log_zygote_capture_started));
+
         logExecutor.execute(this::connectLoop);
     }
 
@@ -117,7 +118,7 @@ public class HelpFragment extends Fragment {
             } finally {
                 closeConnection();
             }
-            
+
             // 如果还在运行，等待后重连
             if (isRunning.get()) {
                 waitAndPrepareReconnect();
@@ -130,19 +131,21 @@ public class HelpFragment extends Fragment {
      */
     private void waitAndPrepareReconnect() {
         reconnectCount++;
-        
+
         // 只在特定次数显示日志，避免刷屏
         if (shouldShowReconnectLog()) {
-            appendLogSafe("System", "等待 " + (currentReconnectDelay / 1000) + " 秒后重连... (第 " + reconnectCount + " 次)");
+            String msg = getContext().getString(R.string.log_reconnect_waiting, (currentReconnectDelay / 1000), reconnectCount);
+            appendLogSafe("System", msg);
+
         }
-        
+
         try {
             Thread.sleep(currentReconnectDelay);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return;
         }
-        
+
         // 指数退避：逐渐增加重连间隔，但不超过最大值
         currentReconnectDelay = Math.min(currentReconnectDelay * 2, MAX_RECONNECT_DELAY);
     }
@@ -168,24 +171,24 @@ public class HelpFragment extends Fragment {
      */
     private boolean connect() {
         try {
-            appendLogSafe("System", "正在连接日志服务器...");
-            
+            appendLogSafe("System", getContext().getString(R.string.log_connecting_server));
+
             socket = new Socket();
             socket.connect(new InetSocketAddress(LOG_SERVER_HOST, LOG_SERVER_PORT), SOCKET_TIMEOUT);
             socket.setSoTimeout(0); // 读取时不超时，持续等待数据
             socket.setKeepAlive(true);
-            
+
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            
+
             isConnected.set(true);
-            appendLogSafe("System", "✓ 已连接到日志服务器");
-            
+            appendLogSafe("System", getContext().getString(R.string.log_connected_to_server));
+
             // 发送 DUMP_LOGS 命令获取历史日志
             out.println("DUMP_LOGS");
-            
+
             return true;
-            
+
         } catch (SocketTimeoutException e) {
             // 连接超时时静默处理，避免刷屏
             Log.d(TAG, "Connection timeout");
@@ -193,7 +196,7 @@ public class HelpFragment extends Fragment {
             // 连接失败时静默处理
             Log.d(TAG, "Connection failed: " + e.getMessage());
         }
-        
+
         return false;
     }
 
@@ -207,14 +210,14 @@ public class HelpFragment extends Fragment {
                 line = in.readLine();
                 if (line == null) {
                     // 服务器关闭连接
-                    appendLogSafe("System", "服务器断开连接");
+                    appendLogSafe("System", getContext().getString(R.string.log_server_disconnected));
                     break;
                 }
                 appendLogSafe(line);
             }
         } catch (IOException e) {
             if (isRunning.get()) {
-                appendLogSafe("System", "连接中断: " + e.getMessage());
+                appendLogSafe("System", getContext().getString(R.string.log_connection_interrupted, e.getMessage()));
             }
         }
     }
@@ -233,7 +236,7 @@ public class HelpFragment extends Fragment {
         if (!isAdded() || getLifecycle().getCurrentState().ordinal() < Lifecycle.State.STARTED.ordinal()) {
             return;
         }
-        
+
         mainHandler.post(() -> {
             if (logView != null && isAdded()) {
                 logView.appendLog(logLine);
@@ -246,21 +249,21 @@ public class HelpFragment extends Fragment {
      */
     private void closeConnection() {
         isConnected.set(false);
-        
+
         if (out != null) {
             try {
                 out.close();
             } catch (Exception ignored) {}
             out = null;
         }
-        
+
         if (in != null) {
             try {
                 in.close();
             } catch (Exception ignored) {}
             in = null;
         }
-        
+
         if (socket != null) {
             try {
                 socket.close();
@@ -274,10 +277,10 @@ public class HelpFragment extends Fragment {
      */
     private void stopLogging() {
         Log.d(TAG, "Stopping logging...");
-        
+
         isRunning.set(false);
         closeConnection();
-        
+
         if (logExecutor != null && !logExecutor.isShutdown()) {
             logExecutor.shutdownNow();
             try {
@@ -287,7 +290,7 @@ public class HelpFragment extends Fragment {
             }
             logExecutor = null;
         }
-        
+
         Log.d(TAG, "Logging stopped");
     }
 
@@ -302,10 +305,10 @@ public class HelpFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        
+
         stopLogging();
         mainHandler.removeCallbacksAndMessages(null);
-        
+
         if (logView != null) {
             logView.destroy();
             logView = null;

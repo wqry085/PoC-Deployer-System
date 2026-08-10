@@ -49,16 +49,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 自定义日志显示器控件 - 增强版
- * 
- * 功能特性：
- * - 双指缩放字体大小
- * - 双击暂停/恢复
- * - 日志级别高亮显示
- * - 日志过滤
- * - 搜索高亮
- * - 多主题支持
- * - 导出功能
+ * Кастомный элемент интерфейса для отображения логов (Log Viewer) — Расширенная версия
+ *
+ * Функциональные возможности:
+ * - Изменение размера шрифта жестом масштабирования (двумя пальцами)
+ * - Приостановка / возобновление вывода логов по двойному нажатию
+ * - Подсветка (выделение цветом) уровней логирования
+ * - Фильтрация логов
+ * - Подсветка результатов поиска
+ * - Поддержка нескольких тем оформления
+ * - Функция экспорта логов
  */
 public class LogView extends FrameLayout {
 
@@ -308,8 +308,8 @@ public class LogView extends FrameLayout {
     private float currentTextSize = 12f;
     private float minTextSize = 6f;
     private float maxTextSize = 32f;
-    private float defaultTextSize = 12f;
-    private boolean isScaling = false;
+    private float defaultTextSize = 14f;
+    private boolean isScaling = true;
     private OnScaleChangeListener scaleChangeListener;
 
     // 缩放指示器隐藏延迟
@@ -373,7 +373,7 @@ public class LogView extends FrameLayout {
 
     // ==================== 初始化 ====================
     private void init(Context context) {
-        currentTheme = Theme.dark();
+        currentTheme = Theme.monokai();
         logBuilder = new SpannableStringBuilder();
         lineNumberBuilder = new SpannableStringBuilder();
         timeFormat = new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.getDefault());
@@ -392,7 +392,7 @@ public class LogView extends FrameLayout {
 
         // 状态栏
         statusBar = new AppCompatTextView(context);
-        statusBar.setTextSize(10);
+        statusBar.setTextSize(14);
         statusBar.setPadding(16, 8, 16, 8);
         statusBar.setVisibility(GONE);
         mainContainer.addView(statusBar, new LinearLayout.LayoutParams(

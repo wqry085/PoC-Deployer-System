@@ -11,7 +11,7 @@
     <string name="dev_home">Profil Coolapk du développeur</string>
     <string name="project_category">Projet</string>
     <string name="zygotelog_help">Cela démarrera un écouteur de socket local pour le service de journalisation zygote, nécessitant l\'autorisation Shizuku\n\nAprès un démarrage réussi, entrez nc 127.0.0.1 13568 dans l\'émulateur de terminal\nEntrez STOP dans la console pour terminer la journalisation\nChangez de mode de travail via les commandes TRY_GREP/TRY_PID</string>
-    
+
     <!-- ZygoteActivity - Dialogs -->
     <string name="apply">Appliquer</string>
     <string name="cancel">Annuler</string>
@@ -259,7 +259,7 @@
     <string name="folder_receiver_waiting_for_connection">En attente de connexion client sur le port %d...</string>
     <string name="folder_receiver_server_start_failed">Échec du démarrage du serveur : %s</string>
     <string name="folder_receiver_starting_file_receive">Démarrage de la réception de fichiers...</string>
-    <string name="folder_receiver_receiving_file_progress">Réception du fichier : %s (%s)\nProgression : %d/%d</string>
+    <string name="folder_receiver_receiving_file_progress">Réception du fichier : %1$s (%2$s)\nProgression : %3$d/%4$d</string>
     <string name="folder_receiver_creating_directory">Création du répertoire : %s</string>
     <string name="folder_receiver_receive_complete">Réception des fichiers terminée, %d fichiers reçus au total</string>
     <string name="folder_receiver_ready_for_next">Prêt pour la prochaine transmission...</string>
@@ -279,5 +279,9 @@
 
     <string name="disclaimer_title">AVERTISSEMENT ET CLAUSE DE NON-RESPONSABILITÉ</string>
     <string name="disclaimer_content">Cet outil (PoC-Deployer-System) implique des modifications système avancées, y compris l\'injection Zygote et la manipulation du noyau.\n\nEn faisant glisser pour déverrouiller, vous acceptez que :\n1. Vous assumez l\'entière responsabilité de tout dommage à votre appareil (boucles de démarrage, brique, perte de données).\n2. Le développeur n\'est PAS responsable des conséquences de l\'utilisation de ce logiciel.\n3. Vous comprenez qu\'il s\'agit d\'une version BETA destinée uniquement à des fins de test et d\'éducation.\n\nSi vous n\'êtes pas d\'accord, veuillez désinstaller cette application immédiatement.</string>
+    <string name="daemon_status_checking" >Checking daemon status...</string>
+    <string name="enable_whitelist">Enable whitelist</string>
+    <string name="display_system_application">Display system application</string>
+    <string name="authorize_this_app">Authorize this app</string>
 
 </resources>

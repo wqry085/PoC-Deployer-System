@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:maxLines="1"
+            android:maxLines="3"
             android:ellipsize="end"/>
 
         <!-- 应用包名 -->
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary"
-            android:maxLines="1"
+            android:maxLines="3"
             android:ellipsize="middle"
             android:layout_marginTop="4dp"/>
 

@@ -1,4 +1,5 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://android.com"
     android:background="@android:color/transparent">
     <PreferenceCategory android:title="@string/pref_category_runtime">
         <Preference
@@ -35,6 +36,12 @@
             android:title="@string/pref_command_input"
             android:dialogTitle="@string/pref_command_dialog"
             android:defaultValue="id"/>
+
+        <EditTextPreference
+            android:key="lib_shizuku_path"
+            android:title="@string/pref_lib_shizuku_path"
+            android:dialogTitle="@string/pref_lib_shizuku_path_dialog"
+            android:defaultValue=""/>
 
         <EditTextPreference
             android:key="setuid_input"
@@ -100,6 +107,11 @@
             android:key="execute_btn"
             android:title="@string/pref_execute_btn"
             android:summary="@string/pref_execute_summary"/>
+
+        <Preference
+            android:key="run_shizuku_btn"
+            android:title="@string/pref_run_shizuku_btn"
+            android:summary="@string/pref_run_shizuku_summary"/>
 
         <ListPreference
             android:key="runtime_flags_list"

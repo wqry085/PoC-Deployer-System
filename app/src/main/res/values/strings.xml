@@ -140,6 +140,8 @@
     <string name="pref_category_injection">Injection Related</string>
     <string name="pref_command_input">Input Injection Command</string>
     <string name="pref_command_dialog">Input Shell Command</string>
+    <string name="pref_lib_shizuku_path">Путь к Shizuku</string>
+    <string name="pref_lib_shizuku_path_dialog">Ввод пути к libshizuku.so</string>
     <string name="pref_uid_input">Injection UID</string>
     <string name="pref_uid_dialog">Input Valid UID</string>
     <string name="pref_gid_input">Injection GID</string>
@@ -164,6 +166,8 @@
     <string name="pref_terminal">Terminal Emulator</string>
     <string name="pref_terminal_summary">Lightweight terminal emulator with built-in commands</string>
     <string name="pref_execute_btn">Execute Command</string>
+    <string name="pref_run_shizuku_btn">Run Shizuku(uid 1000)</string>
+    <string name="pref_run_shizuku_summary">Shizuku запустится с правами (uid 1000)</string>
     <string name="pref_execute_summary">Injection will occur immediately</string>
 
     <string name="pref_category_server">Server Control</string>
@@ -258,7 +262,7 @@
     <string name="folder_receiver_waiting_for_connection">Waiting for client to connect to port %d...</string>
     <string name="folder_receiver_server_start_failed">Server startup failed: %s</string>
     <string name="folder_receiver_starting_file_receive">Starting to receive files...</string>
-    <string name="folder_receiver_receiving_file_progress">Receiving file: %s (%s)\nProgress: %d/%d</string>
+    <string name="folder_receiver_receiving_file_progress">Receiving file: %1$s (%2$s)\nProgress: %3$d/%4$d</string>
     <string name="folder_receiver_creating_directory">Creating directory: %s</string>
     <string name="folder_receiver_receive_complete">File reception complete, %d files received in total</string>
     <string name="folder_receiver_ready_for_next">Ready for next transmission...</string>
@@ -278,5 +282,33 @@
 
     <string name="disclaimer_title">DISCLAIMER &amp; WARNING</string>
     <string name="disclaimer_content">This tool (PoC-Deployer-System) involves advanced system modifications, including Zygote injection and kernel manipulation.\n\nBy swiping to unlock, you agree that:\n1. You accept full responsibility for any damage to your device (bootloops, bricking, data loss).\n2. The developer is NOT liable for any consequences of using this software.\n3. You understand this is a BETA build intended for testing and educational purposes only.\n\nIf you do not agree, please uninstall this application immediately.</string>
+    <string name="daemon_status_checking" >Checking daemon status...</string>
+    <string name="enable_whitelist">Enable whitelist</string>
+    <string name="display_system_application">Display system application</string>
+    <string name="authorize_this_app">Authorize this app</string>
+    <!-- Строки для AuthorizationListFragment -->
+    <string name="checking_daemon_status">Проверка состояния демона…</string>
+    <string name="daemon_not_running">⚠️ Демон политик не запущен</string>
+    <string name="error_daemon_not_running">Демон политик не запущен, сначала запустите службу</string>
+    <string name="whitelist_enabled">Белый список включен</string>
+    <string name="whitelist_disabled">Белый список выключен</string>
+    <string name="operation_failed">Операция не удалась</string>
+    <string name="search_apps_hint">Поиск приложений…</string>
+    <string name="log_zygote_capture_started">Начало захвата логов Zygote в реальном времени...</string>
+    <string name="log_reconnect_waiting">Waiting %1$d seconds to reconnect... (Attempt #%2$d)</string>
+    <string name="log_connecting_server">Connecting to log server…</string>
+    <string name="log_connected_to_server">✓ Connected to log server</string>
+    <string name="log_server_disconnected">Server disconnected</string>
+    <string name="log_connection_interrupted">Connection interrupted: %1$s</string>
+    <string name="cfg_null">Конфигурация отсутствует (Null)</string>
+    <string name="cfg_total_lines">Всего строк: %1$d\n</string>
+    <string name="cfg_counter_line">Заголовок/Счетчик: \'%1$s\'\n</string>
+    <string name="cfg_empty_line">Пустая строка %1$d: позиция %2$d\n</string>
+    <string name="cfg_param_line">Параметр %1$d: \'%2$s\'\n</string>
+    <string name="cfg_non_empty_summary">Непустых строк с параметрами: %1$d\n</string>
+    <string name="cfg_empty_summary">Пустых строк: %1$d\n</string>
+    <string name="zygote_warning">Эта функция не всегда работает стабильно.\nВозможен сбой при создании процесса Zygote.</string>
+    <string name="hint_enter_package_name">Введите имя пакета приложения</string>
+
 
 </resources>

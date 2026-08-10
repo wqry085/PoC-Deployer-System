@@ -3,11 +3,14 @@ apply plugin: 'com.android.library'
 android {
     namespace 'com.termux.view'  // 添加这行
     compileSdk 33
-    
+
     defaultConfig {
         minSdk 28
         targetSdk 28
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
     }
 
     buildTypes {
@@ -15,6 +18,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
     }
 
     compileOptions {

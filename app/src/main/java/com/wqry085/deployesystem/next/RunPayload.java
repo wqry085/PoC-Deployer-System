@@ -36,11 +36,11 @@ import rikka.shizuku.Shizuku;
 
 /**
  * Payload 加载器 Activity
- * 
+ *
  * 支持两种调用方式：
  * 1. 通过分享（Share Intent）接收文件或文本
  * 2. 通过 ADB 直接调用（静默模式）
- * 
+ *
  * ADB 调用示例：
  * am start -n com.wqry085.deployesystem/.next.RunPayload \
  *     -a com.wqry085.deployesystem.ADB_RUN_PAYLOAD \
@@ -59,7 +59,7 @@ public class RunPayload extends Activity {
     // Settings
     private static final String SETTINGS_KEY = "hidden_api_blacklist_exemptions";
     private static final String SETTINGS_URI = "content://settings/global";
-    private static final String CONFIG_FILE_PATH = "/data/local/tmp/只读配置.txt";
+    private static final String CONFIG_FILE_PATH = "/data/local/tmp/read_only_config.txt";
     private static final int RESET_DELAY_MS = 200;
 
     // State

